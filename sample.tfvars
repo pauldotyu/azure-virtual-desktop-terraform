@@ -8,7 +8,6 @@ tags = {
 }
 
 vnet_address_space = ["10.21.17.0/28"]
-snet_address_space = ["10.21.17.0/28"]
 vnet_custom_dns_servers = [
   "10.21.0.4",
   "10.21.0.5"
@@ -23,6 +22,7 @@ vnet_peerings = [
     vnet_name                = "vn-devops"
   }
 ]
+snet_address_space = ["10.21.17.0/28"]
 
 vm_count = 1
 vm_sku   = "Standard_B2ms"
