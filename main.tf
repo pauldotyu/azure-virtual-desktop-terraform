@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "wvd" {
 ##############################################
 
 resource "azurerm_virtual_network" "wvd" {
-  name                = "vn-${random_pet.wvd.id}"
+  name                = "vnet-${random_pet.wvd.id}"
   resource_group_name = azurerm_resource_group.wvd.name
   location            = azurerm_resource_group.wvd.location
   tags                = var.tags
@@ -27,7 +27,7 @@ resource "azurerm_virtual_network" "wvd" {
 }
 
 resource "azurerm_subnet" "wvd" {
-  name                 = "sn-${random_pet.wvd.id}"
+  name                 = "snet-${random_pet.wvd.id}"
   resource_group_name  = azurerm_resource_group.wvd.name
   virtual_network_name = azurerm_virtual_network.wvd.name
   address_prefixes     = var.snet_address_space
