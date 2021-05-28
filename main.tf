@@ -49,7 +49,7 @@ resource "azurerm_subnet_network_security_group_association" "wvd" {
 # VIRTUAL NETWORK PEERING
 ##########################################
 
-# Get resources by type, create spoke vNet peerings
+# Get resources by type, create spoke vnet peerings
 data "azurerm_resources" "vnets" {
   type = "Microsoft.Network/virtualNetworks"
 
@@ -209,11 +209,6 @@ resource "azurerm_virtual_machine_extension" "wvd" {
       "commandToExecute": "powershell.exe -Command \"./ConfigureRemotingForAnsible.ps1; exit 0;\""
     }
   PROTECTED_SETTINGS
-
-  depends_on = [
-    azurerm_virtual_network_peering.peer_out,
-    azurerm_virtual_network_peering.peer_in
-  ]
 }
 
 ################################

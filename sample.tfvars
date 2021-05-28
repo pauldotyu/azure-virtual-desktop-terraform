@@ -9,6 +9,7 @@ tags = {
 
 vnet_address_space = ["10.21.17.0/28"]
 vnet_custom_dns_servers = [
+  "168.63.129.16",
   "10.21.0.4",
   "10.21.0.5"
 ]
