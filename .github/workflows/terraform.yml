@@ -1,14 +1,16 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Terraform
 
 # Controls when the action will run. 
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: 
+    - main
   pull_request:
-    branches: [ main ]
+    branches:
+    - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -16,21 +18,38 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  terraform:
+    name: 'Terraform'
     # The type of runner that the job will run on
     runs-on: self-hosted
+    environment: production
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        run: terraform init
+
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan -var-file=sample.tfvars -var="vm_username=${{ secrets.AZ_VM_USERNAME }}" -var="vm_password=${{ secrets.AZ_VM_PASSWORD }}" -out=main.tfplan
+
+        # On push to main, build or change infrastructure according to Terraform configuration files
+        # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve main.tfplan
