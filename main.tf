@@ -216,7 +216,7 @@ resource "azurerm_virtual_machine_extension" "wvd" {
 ################################
 
 resource "local_file" "wvd" {
-  filename = "ansible/inventory-${random_pet.wvd.id}"
+  filename = "ansible/inventory"
 
   content = templatefile("ansible/template-inventory.tpl",
     {
