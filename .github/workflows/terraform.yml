@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Terraform
 
 # Controls when the action will run. 
@@ -17,7 +15,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  # This workflow contains a single job called "terraform"
   terraform:
     name: 'Terraform'
     # The type of runner that the job will run on
@@ -40,7 +38,7 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      # Checks that all Terraform configuration files adhere to a canonical format
+      # Checks that all Terraform configuration files adhere to a canonical format. If the fmt is bad, the job will fail
       - name: Terraform Format
         run: terraform fmt -check
 
