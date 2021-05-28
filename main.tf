@@ -97,7 +97,7 @@ resource "azurerm_virtual_desktop_host_pool" "wvd" {
   maximum_sessions_allowed = var.host_pool_max_sessions_allowed
 
   registration_info {
-    expiration_date = timeadd(format("%sT00:00:00Z", formatdate("YYYY-MM-DD", timestamp())), "1440m")
+    expiration_date = timeadd(format("%sT00:00:00Z", formatdate("YYYY-MM-DD", timestamp())), "3600m")
   }
 }
 
