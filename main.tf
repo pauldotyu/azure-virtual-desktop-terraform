@@ -225,7 +225,7 @@ resource "local_file" "wvd" {
 
   content = templatefile("ansible/template-inventory.tpl",
     {
-      hosts    = zipmap(azurerm_windows_virtual_machine.wvd.*.name, azurerm_network_interface.wvd.*.private_ip_address),
+      hosts = zipmap(azurerm_windows_virtual_machine.wvd.*.name, azurerm_network_interface.wvd.*.private_ip_address),
     }
   )
 }
