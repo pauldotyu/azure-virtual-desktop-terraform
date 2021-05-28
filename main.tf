@@ -18,7 +18,7 @@ resource "azurerm_resource_group" "wvd" {
 ##############################################
 
 resource "azurerm_virtual_network" "wvd" {
-  name                = "vnet-${random_pet.wvd.id}"
+  name                = "vn-${random_pet.wvd.id}"
   resource_group_name = azurerm_resource_group.wvd.name
   location            = azurerm_resource_group.wvd.location
   tags                = var.tags
@@ -27,7 +27,7 @@ resource "azurerm_virtual_network" "wvd" {
 }
 
 resource "azurerm_subnet" "wvd" {
-  name                 = "snet-${random_pet.wvd.id}"
+  name                 = "sn-${random_pet.wvd.id}"
   resource_group_name  = azurerm_resource_group.wvd.name
   virtual_network_name = azurerm_virtual_network.wvd.name
   address_prefixes     = var.snet_address_space
@@ -131,7 +131,7 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "wvd"
 
 # Make sure the VM name prefix doesn't exceed 12 characters
 locals {
-  vm_name = substr(random_pet.wvd.id, 0, 12)
+  vm_name = substr(format("vm%s", random_pet.wvd.id), 0, 12)
 }
 
 resource "azurerm_network_interface" "wvd" {
