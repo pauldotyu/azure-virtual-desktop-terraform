@@ -1,0 +1,1 @@
+# azure-wvd-terraform
