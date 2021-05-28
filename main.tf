@@ -61,7 +61,7 @@ data "azurerm_resources" "vnets" {
 
 resource "azurerm_virtual_network_peering" "peer_out" {
   count                        = length(data.azurerm_resources.vnets.resources)
-  name                         = "to-${data.azurerm_resources.vnets.resources[count.index].name}"
+  name                         = "${azurerm_virtual_network.wvd.name}-to-${data.azurerm_resources.vnets.resources[count.index].name}"
   remote_virtual_network_id    = data.azurerm_resources.vnets.resources[count.index].id
   resource_group_name          = azurerm_resource_group.wvd.name
   virtual_network_name         = azurerm_virtual_network.wvd.name
@@ -73,7 +73,7 @@ resource "azurerm_virtual_network_peering" "peer_out" {
 
 resource "azurerm_virtual_network_peering" "peer_in" {
   for_each                     = { for vp in var.vnet_peerings : vp.vnet_name => vp }
-  name                         = "to-${random_pet.wvd.id}"
+  name                         = "${each.value["vnet_name"]}-to-${azurerm_virtual_network.wvd.name}"
   remote_virtual_network_id    = azurerm_virtual_network.wvd.id
   resource_group_name          = each.value["vnet_resource_group_name"]
   virtual_network_name         = each.value["vnet_name"]
