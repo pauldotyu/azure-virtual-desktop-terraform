@@ -59,7 +59,7 @@ data "azurerm_resources" "vnets" {
   }
 }
 
-resource "azurerm_virtual_network_peering" "peer_out" {
+resource "azurerm_virtual_network_peering" "out" {
   count                        = length(data.azurerm_resources.vnets.resources)
   name                         = "${azurerm_virtual_network.wvd.name}-to-${data.azurerm_resources.vnets.resources[count.index].name}"
   remote_virtual_network_id    = data.azurerm_resources.vnets.resources[count.index].id
@@ -71,7 +71,7 @@ resource "azurerm_virtual_network_peering" "peer_out" {
   use_remote_gateways          = false
 }
 
-resource "azurerm_virtual_network_peering" "peer_in" {
+resource "azurerm_virtual_network_peering" "in" {
   for_each                     = { for vp in var.vnet_peerings : vp.vnet_name => vp }
   name                         = "${each.value["vnet_name"]}-to-${azurerm_virtual_network.wvd.name}"
   remote_virtual_network_id    = azurerm_virtual_network.wvd.id
@@ -179,6 +179,11 @@ resource "azurerm_windows_virtual_machine" "wvd" {
   identity {
     type = "SystemAssigned"
   }
+
+  depends_on = [
+    azurerm_virtual_network_peering.out,
+    azurerm_virtual_network_peering.in
+  ]
 }
 
 ##################################################################
@@ -209,6 +214,11 @@ resource "azurerm_virtual_machine_extension" "wvd" {
       "commandToExecute": "powershell.exe -Command \"./ConfigureRemotingForAnsible.ps1; exit 0;\""
     }
   PROTECTED_SETTINGS
+
+  depends_on = [
+    azurerm_virtual_network_peering.out,
+    azurerm_virtual_network_peering.in
+  ]
 }
 
 ################################
