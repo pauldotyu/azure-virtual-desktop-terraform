@@ -66,10 +66,6 @@ jobs:
           export ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}
           export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
           terraform apply -auto-approve main.tfplan
-      
-      - name: Ansible Playbook
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
           cd ansible
           echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > pass
           ansible all -i inventory-usabledove -e @secrets.yml --vault-password-file pass -m win_ping
