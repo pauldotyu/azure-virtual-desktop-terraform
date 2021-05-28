@@ -28,13 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Export AZ CLI credentials
-        run: |
-          export ARM_CLIENT_ID=${{ secrets.AZ_CLI_CLIENT_ID }}
-          export ARM_CLIENT_SECRET=${{ secrets.AZ_CLI_CLIENT_SECRET }}
-          export ARM_SUBSCRIPTION_ID=${{ secrets.AZ_CLI_SUBSCRIPTION_ID }}
-          export ARM_TENANT_ID=${{ secrets.AZ_CLI_TENANT_ID }}
-
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1.2.1
@@ -51,10 +44,10 @@ jobs:
       
       # Generates an execution plan for Terraform
       - name: Terraform Plan
-        run: terraform plan -var-file=sample.tfvars -var="vm_username=${{ secrets.AZ_VM_USERNAME }}" -var="vm_password=${{ secrets.AZ_VM_PASSWORD }}" -out=main.tfplan
+        run: terraform plan
 
         # On push to main, build or change infrastructure according to Terraform configuration files
         # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve main.tfplan
+        run: terraform apply -auto-approve
