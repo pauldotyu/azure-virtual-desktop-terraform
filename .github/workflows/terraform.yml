@@ -70,6 +70,6 @@ jobs:
       - name: Ansible Playbook
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          cd ansible
           echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > pass
           ansible all -i inventory-usabledove -e @secrets.yml --vault-password-file pass -m win_ping
-        working-directory: ansible
