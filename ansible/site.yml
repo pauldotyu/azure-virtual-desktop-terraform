@@ -2,8 +2,6 @@
 - name: Windows Virtual Desktop Setup
   hosts: winclient
   gather_facts: yes
-  vars: # this variable will need to be updated just before running the playbook
-    registration_token: <REGISTRATION_TOKEN>
   tasks:
     - name: Download Windows Virtual Desktop Agent
       ansible.windows.win_get_url:

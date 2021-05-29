@@ -66,11 +66,13 @@ jobs:
           export ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}
           export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
           terraform apply -auto-approve main.tfplan
-      
+          echo '::set-output name=TF_REGISTRATION_TOKEN::$(terraform output -raw registration_token)'
+        id: terraform-apply
       - name: Ansible Playbook
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
+          echo '${{ steps.terraform-apply.outputs.TF_REGISTRATION_TOKEN }}' > token
           echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > pass
           #ansible all -i inventory -e @secrets.yml --vault-password-file pass -m win_ping
-          ansible-playbook -i inventory -e @secrets.yml --vault-password-file pass site.yml
+          ansible-playbook -i inventory -e "registration_token=${{ steps.terraform-apply.outputs.TF_REGISTRATION_TOKEN }}" -e @secrets.yml --vault-password-file pass site.yml
         working-directory: ansible

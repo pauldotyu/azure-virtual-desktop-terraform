@@ -88,7 +88,7 @@ resource "azurerm_virtual_network_peering" "in" {
 ##############################################
 
 resource "azurerm_virtual_desktop_host_pool" "wvd" {
-  name                     = "nsg-${random_pet.wvd.id}"
+  name                     = "hp-${random_pet.wvd.id}"
   resource_group_name      = azurerm_resource_group.wvd.name
   location                 = azurerm_resource_group.wvd.location
   type                     = var.host_pool_type
