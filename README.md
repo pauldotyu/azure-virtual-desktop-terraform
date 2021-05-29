@@ -100,9 +100,9 @@ More on Ansible Secrets here:
 - [Encrypting content with Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
 - [Handling secrets in your Ansible playbooks](https://www.redhat.com/sysadmin/ansible-playbooks-secrets)
 
-### GitHub Action
+### GitHub Action Setup
 
-If you configured all the proper secrets (listed in steps above) you should see an Action running each time you do a push or pull request into the main branch.
+If you configured all the secrets (listed in steps above) you should see a GitHub Action workflow running each time you do a push or pull request into the main branch. There's nothing else you need to do here.
 
 Now, go watch it run and have fun!!
 
