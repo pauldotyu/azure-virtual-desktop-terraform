@@ -36,12 +36,13 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1.2.1
         with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }} # Using TF Cloud for remote state storage but run locally so we'll need to use Azure CLI login context
           terraform_wrapper: false
 
       # Checks that all Terraform configuration files adhere to a canonical format. If the fmt is bad, the job will fail
       - name: Terraform Format
         run: terraform fmt -check
+        continue-on-error: true
         
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
