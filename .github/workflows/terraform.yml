@@ -33,6 +33,7 @@ jobs:
         uses: hashicorp/setup-terraform@v1.2.1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+          terraform_wrapper: false
 
       # Checks that all Terraform configuration files adhere to a canonical format. If the fmt is bad, the job will fail
       - name: Terraform Format
@@ -66,7 +67,8 @@ jobs:
           export ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}
           export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
           terraform apply -auto-approve main.tfplan
-          terraform output -raw registration_token > token
+          token=$(terraform output -raw registration_token)
+          echo $token
           #echo "::set-output name=TF_REGISTRATION_TOKEN::${{ terraform output -raw registration_token }}"
         id: terraform-apply
 
