@@ -35,7 +35,7 @@
         state: present
         log_path: C:\Users\AgentBootLoaderInstall.txt
     - name: Join virtual machine to domain
-      ansible.windows.win_domain_membership: # the variables used for this module are expected to be in your ansible-vault
+      ansible.windows.win_domain_membership:
         dns_domain_name: "{{ dns_domain_name }}"
         domain_admin_user: "{{ domain_admin_user }}"
         domain_admin_password: "{{ domain_admin_password }}"
