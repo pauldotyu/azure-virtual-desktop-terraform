@@ -54,7 +54,7 @@ jobs:
           export ARM_CLIENT_SECRET=${{ secrets.ARM_CLIENT_SECRET }}
           export ARM_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID }}
           export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
-          terraform plan -var-file=sample.tfvars -var="vm_username=${{ secrets.AZ_VM_USERNAME }}" -var="vm_password=${{ secrets.AZ_VM_PASSWORD }}" -out=main.tfplan
+          terraform plan -var-file=sample.tfvars -var="username=${{ secrets.AZ_VM_USERNAME }}" -var="password=${{ secrets.AZ_VM_PASSWORD }}" -out=main.tfplan
 
       # On push to main, build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks

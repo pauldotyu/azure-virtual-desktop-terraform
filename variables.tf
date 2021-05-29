@@ -60,11 +60,11 @@ variable "vm_sku" {
   description = "Virtual machine SKU"
 }
 
-variable "vm_username" {
+variable "username" {
   type = string
 }
 
-variable "vm_password" {
+variable "password" {
   type      = string
   sensitive = true
 }

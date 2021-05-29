@@ -155,8 +155,8 @@ resource "azurerm_windows_virtual_machine" "wvd" {
   resource_group_name = azurerm_resource_group.wvd.name
   location            = azurerm_resource_group.wvd.location
   size                = var.vm_sku
-  admin_username      = var.vm_username
-  admin_password      = var.vm_password
+  admin_username      = var.username
+  admin_password      = var.password
   tags                = merge(var.tags, { "role" = "WVDSessionHost" })
 
   network_interface_ids = [
