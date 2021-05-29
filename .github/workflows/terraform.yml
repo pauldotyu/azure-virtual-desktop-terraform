@@ -73,7 +73,7 @@ jobs:
           export ARM_TENANT_ID=${{ secrets.ARM_TENANT_ID }}
           terraform apply -auto-approve main.tfplan
           token=$(terraform output -raw registration_token)
-          echo "::set-output name=TF_REGISTRATION_TOKEN::${{ $token }}"
+          echo '::set-output name=TF_REGISTRATION_TOKEN::${{ $token }}'
         id: terraform-apply
 
       # On push to main, run the Ansible plabybook
