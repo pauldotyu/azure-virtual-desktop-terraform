@@ -149,8 +149,15 @@ resource "azurerm_network_interface" "wvd" {
   tags = var.tags
 }
 
-data "azurerm_shared_image" "wvd" {
-  name                = var.sig_image_name
+# data "azurerm_shared_image" "wvd" {
+#   name                = var.sig_image_name
+#   gallery_name        = var.sig_name
+#   resource_group_name = var.sig_resource_group_name
+# }
+
+data "azurerm_shared_image_version" "wvd" {
+  name                = "latest"
+  image_name          = var.sig_image_name
   gallery_name        = var.sig_name
   resource_group_name = var.sig_resource_group_name
 }
@@ -182,7 +189,7 @@ resource "azurerm_windows_virtual_machine" "wvd" {
   #   version   = var.vm_image.version
   # }
 
-  source_image_id = data.azurerm_shared_image.wvd.id
+  source_image_id = data.azurerm_shared_image_version.wvd.id
 
   identity {
     type = "SystemAssigned"
