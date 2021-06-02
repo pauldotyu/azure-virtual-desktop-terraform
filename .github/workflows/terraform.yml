@@ -80,7 +80,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
           echo '${{ secrets.ANSIBLE_VAULT_PASSWORD }}' > pass
-          #ansible all -i inventory -e @secrets.yml --vault-password-file pass -m win_ping
+          ansible all -i inventory -e @secrets.yml --vault-password-file pass -m win_ping
           ansible-playbook -i inventory -e "registration_token=${{ steps.terraform-apply.outputs.TF_REGISTRATION_TOKEN }}" -e @secrets.yml --vault-password-file pass site.yml
           rm pass
         working-directory: ansible
