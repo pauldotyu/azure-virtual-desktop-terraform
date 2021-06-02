@@ -69,15 +69,15 @@ variable "password" {
   sensitive = true
 }
 
-variable "vm_image" {
-  type = object({
-    publisher = string
-    offer     = string
-    sku       = string
-    version   = string
-  })
-  description = "Virtual machine image - Use 'az vm image' command to find your image"
-}
+# variable "vm_image" {
+#   type = object({
+#     publisher = string
+#     offer     = string
+#     sku       = string
+#     version   = string
+#   })
+#   description = "Virtual machine image - Use 'az vm image' command to find your image"
+# }
 
 variable "vm_os_disk_caching" {
   type = object({

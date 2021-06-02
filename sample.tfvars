@@ -40,12 +40,7 @@ vm_os_disk_caching = {
 #   sku       = "20h2-evd-o365pp"
 #   version   = "latest"
 # }
-vm_image = {
-  publisher = "contoso "
-  offer     = "windows"
-  sku       = "wvd-funburro"
-  version   = "latest"
-}
+
 # Use either this or the image source above - still testing
 sig_image_name          = "wvd-funburro"
 sig_name                = "sigfunburro"
