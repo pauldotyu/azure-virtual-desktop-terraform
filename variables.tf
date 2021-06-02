@@ -94,3 +94,18 @@ variable "vnet_peerings" {
   }))
   description = "List of remote virtual networks to peer with"
 }
+
+variable "sig_image_name" {
+  type        = string
+  description = "Image definition name"
+}
+
+variable "sig_name" {
+  type        = string
+  description = "Shared Image Gallery name"
+}
+
+variable "sig_resource_group_name" {
+  type        = string
+  description = "Shared Image Gallery resource group name"
+}

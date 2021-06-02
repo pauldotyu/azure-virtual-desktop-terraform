@@ -7,6 +7,7 @@ tags = {
   "availability-level" = "a1"
 }
 
+# Virtual Networking
 vnet_address_space = ["10.21.17.0/28"]
 vnet_custom_dns_servers = [
   "10.21.0.4",
@@ -24,15 +25,28 @@ vnet_peerings = [
 ]
 snet_address_space = ["10.21.17.0/28"]
 
+# VM Size
 vm_count = 1
 vm_sku   = "Standard_B2ms"
-vm_image = {
-  publisher = "microsoftwindowsdesktop"
-  offer     = "office-365"
-  sku       = "20h2-evd-o365pp"
-  version   = "latest"
-}
 vm_os_disk_caching = {
   caching              = "ReadWrite"
   storage_account_type = "Standard_LRS"
 }
+
+# VM Image Definition
+# vm_image = {
+#   publisher = "microsoftwindowsdesktop"
+#   offer     = "office-365"
+#   sku       = "20h2-evd-o365pp"
+#   version   = "latest"
+# }
+vm_image = {
+  publisher = "contoso "
+  offer     = "windows"
+  sku       = "wvd-funburro"
+  version   = "latest"
+}
+# Use either this or the image source above - still testing
+sig_image_name          = "wvd-funburro"
+sig_name                = "sigfunburro"
+sig_resource_group_name = "rg-funburro"
