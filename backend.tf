@@ -1,6 +1,6 @@
 terraform {
   backend "remote" {
-    organization = "contosouniversity"
+    organization = "pauldotyu"
 
     workspaces {
       name = "azure-wvd-terraform"
