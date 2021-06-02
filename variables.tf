@@ -69,15 +69,15 @@ variable "password" {
   sensitive = true
 }
 
-# variable "vm_image" {
-#   type = object({
-#     publisher = string
-#     offer     = string
-#     sku       = string
-#     version   = string
-#   })
-#   description = "Virtual machine image - Use 'az vm image' command to find your image"
-# }
+variable "vm_image" {
+  type = object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
+  })
+  description = "Virtual machine image - Use 'az vm image' command to find your image"
+}
 
 variable "vm_os_disk_caching" {
   type = object({
@@ -95,17 +95,17 @@ variable "vnet_peerings" {
   description = "List of remote virtual networks to peer with"
 }
 
-variable "sig_image_name" {
-  type        = string
-  description = "Image definition name"
-}
+# variable "sig_image_name" {
+#   type        = string
+#   description = "Image definition name"
+# }
 
-variable "sig_name" {
-  type        = string
-  description = "Shared Image Gallery name"
-}
+# variable "sig_name" {
+#   type        = string
+#   description = "Shared Image Gallery name"
+# }
 
-variable "sig_resource_group_name" {
-  type        = string
-  description = "Shared Image Gallery resource group name"
-}
+# variable "sig_resource_group_name" {
+#   type        = string
+#   description = "Shared Image Gallery resource group name"
+# }

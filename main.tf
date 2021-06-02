@@ -155,12 +155,12 @@ resource "azurerm_network_interface" "wvd" {
 #   resource_group_name = var.sig_resource_group_name
 # }
 
-data "azurerm_shared_image_version" "wvd" {
-  name                = "latest"
-  image_name          = var.sig_image_name
-  gallery_name        = var.sig_name
-  resource_group_name = var.sig_resource_group_name
-}
+# data "azurerm_shared_image_version" "wvd" {
+#   name                = "latest"
+#   image_name          = var.sig_image_name
+#   gallery_name        = var.sig_name
+#   resource_group_name = var.sig_resource_group_name
+# }
 
 resource "azurerm_windows_virtual_machine" "wvd" {
   count               = var.vm_count
@@ -182,14 +182,14 @@ resource "azurerm_windows_virtual_machine" "wvd" {
     storage_account_type = var.vm_os_disk_caching.storage_account_type
   }
 
-  # source_image_reference {
-  #   publisher = var.vm_image.publisher
-  #   offer     = var.vm_image.offer
-  #   sku       = var.vm_image.sku
-  #   version   = var.vm_image.version
-  # }
+  source_image_reference {
+    publisher = var.vm_image.publisher
+    offer     = var.vm_image.offer
+    sku       = var.vm_image.sku
+    version   = var.vm_image.version
+  }
 
-  source_image_id = data.azurerm_shared_image_version.wvd.id
+  #source_image_id = data.azurerm_shared_image_version.wvd.id
 
   identity {
     type = "SystemAssigned"

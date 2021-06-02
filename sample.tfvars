@@ -34,14 +34,14 @@ vm_os_disk_caching = {
 }
 
 # VM Image Definition
-# vm_image = {
-#   publisher = "microsoftwindowsdesktop"
-#   offer     = "office-365"
-#   sku       = "20h2-evd-o365pp"
-#   version   = "latest"
-# }
+vm_image = {
+  publisher = "microsoftwindowsdesktop"
+  offer     = "office-365"
+  sku       = "20h2-evd-o365pp"
+  version   = "latest"
+}
 
-# Use either this or the image source above - still testing
-sig_image_name          = "wvd-funburro"
-sig_name                = "sigfunburro"
-sig_resource_group_name = "rg-funburro"
+# # Use either this or the image source above - still testing
+# sig_image_name          = "wvd-funburro"
+# sig_name                = "sigfunburro"
+# sig_resource_group_name = "rg-funburro"
