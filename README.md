@@ -22,6 +22,8 @@ To deploy the demo WVD solution within your environment, you will need to have t
     - [Node.js](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
     - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
+> The Terraform script will dynamically peer the WVD virtual network with any virtual network with the tag `role=azops` so make sure the virtual networks that host your **AD** and **DEVOPS** machines are tagged as such.
+
 ## Overview
 
 The Terraform configuration will generate a "random pet name" to be used in naming Azure resources. This is fun for a demo, but you can change this as needed.
