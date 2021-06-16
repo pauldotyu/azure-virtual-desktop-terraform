@@ -55,19 +55,19 @@ I chose to use Terraform Cloud storing remote state files. You also have the opt
 - `ARM_SUBSCRIPTION_ID`
 - `ARM_TENANT_ID`
 
-> NOTE: You could name the GitHub secrets anything you want but you'll need to make sure they are consistent with what is in the [`terraform.yml`](./github/workflows/terraform.yml) workflow file.
+> **NOTE:** You could name the GitHub secrets anything you want but you'll need to make sure they are consistent with what is in the [`terraform.yml`](./github/workflows/terraform.yml) workflow file.
 
 This repo also includes variables for re-usability. The variable definitions can be found in the [`variables.tf`](variables.tf) file. The vaules for each deployment are maintained in a `*.tfvars` file and I've included a [`sample.tfvars`](sample.tfvars) file so you will need to update based on what is deployed in your environment.
 
 To run the Terrafrom script locally, take a look at the [`terraform.yml`](./github/workflows/terraform.yml) workflow file. There you'll find a `terraform plan` and `terraform apply` command with all the arguments you'll need.
 
-> NOTE: If you decide to change the name of the sample.tfvars file, you'll also need to update the filename in the workflow.
+> **NOTE:** If you decide to change the name of the sample.tfvars file, you'll also need to update the filename in the workflow.
 
 ## Ansible Setup
 
 The `site.yml` [Ansible Playbook][ansplaybook] found in this repo relies on a few variables needed to connect to your VM, install the RDSAgent software for registering it as a AVD Session Host, and performing a domain join. Rather then saving credentials to the repo (which is never a good thing), we'll use `ansible-vault` to encrypt contents leveraging [Ansible Vault][ansvault]. The encrypted vault will be commited to the repo as `secrets.yml`.
 
-> NOTE: `secrets.yml` file in this repo contains info specific to my deployment so you'll need to overwrite it with your own.
+> **NOTE:** `secrets.yml` file in this repo contains info specific to my deployment so you'll need to overwrite it with your own.
 
 Let's start by creating a vault file:
 
@@ -77,11 +77,11 @@ ansible-vault create secrets.yml
 
 You will be prompted for a password. Enter a super-secret password. Make it hard to brute force ;-)
 
-> NOTE: You will also need to save the vault password as a GitHub repo Secret named `ANSIBLE_VAULT_PASSWORD` for the GitHub Action workflow to use.
+> **NOTE:** You will also need to save the vault password as a GitHub repo Secret named `ANSIBLE_VAULT_PASSWORD` for the GitHub Action workflow to use.
 
 After the vault password has been set, a VI editor will open.
 
-> NOTE: Be sure to hit the `i` key to put yourself in `insert` mode and enter the following:
+> **NOTE:** Be sure to hit the `i` key to put yourself in `insert` mode and enter the following:
 
 ```text
 ansible_user: <YOUR_VM_USERNAME>
@@ -92,7 +92,7 @@ domain_admin_password: <YOUR_DOMAIN_PASSWORD>
 domain_ou_path: <YOUR_DOMAIN_DISTINGUISHED_OU_PATH>
 ```
 
-> NOTE: Save the file using the following command `:wq!`
+> **NOTE:** Save the file using the following command `:wq!`
 
 If you need to update the vault, you can run the following command to edit the file:
 
@@ -100,7 +100,7 @@ If you need to update the vault, you can run the following command to edit the f
 ansible-vault edit secrets.yml
 ```
 
-> NOTE: You will be prompted to enter your vault password
+> **NOTE:** You will be prompted to enter your vault password
 
 With the vault file saved to the repo, the GitHub Action workflow will use the `ANSIBLE_VAULT_PASSWORD` to unlock the vault when the Ansible playbook is invoked.
 
