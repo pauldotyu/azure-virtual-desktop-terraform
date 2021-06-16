@@ -34,21 +34,21 @@ This deployment also assumes you have full control of your subscription and have
 
 The following resources will be deployed using Terraform:
 
-- [Azure Resource Group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal)
-- [Azure Virtual Network](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview) with a single subnet and [Network Security Group](https://docs.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview) wrapped around it
-    > The virtual network will also have [custom DNS configured](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances) so that your AVD session host VM can communicate with the domain controller when it comes time to domain join.
-- [Azure Virtual Network peerings](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering) to and from AVD virtual network for AADDS and DevOps
-- [Azure Virtual Desktop Host Pool](https://docs.microsoft.com/en-us/azure/virtual-desktop/create-host-pools-azure-marketplace) and the host pool registration token will be exported as an output in the Terraform configuration
-- [Azure Virtual Desktop Application Group](https://docs.microsoft.com/en-us/azure/virtual-desktop/manage-app-groups)
+- [Azure Resource Group][azrg]
+- [Azure Virtual Network][azvnet] with a single subnet and [Network Security Group][aznsg] wrapped around it
+    > The virtual network will also have [custom DNS configured][azdns] so that your AVD session host VM can communicate with the domain controller when it comes time to domain join.
+- [Azure Virtual Network peerings][azvnetpeer] to and from AVD virtual network for AADDS and DevOps
+- [Azure Virtual Desktop Host Pool][avdhp] and the host pool registration token will be exported as an output in the Terraform configuration
+- [Azure Virtual Desktop Application Group][avdag]
 - Azure Virtual Desktop Workspace
-- [Windows Virtual Machine(s)](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/quick-create-portal) with a [Custom Script Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-windows) to configure [WinRM for Ansible](https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html)
+- [Windows Virtual Machine(s)][azwinvm] with a [Custom Script Extension][azvmcse] to configure [WinRM for Ansible][answinrm]
 - A local Ansible inventory file which will include host name and IP to run the Ansible playbook against
 
 ## Terraform Setup
 
-Terraform requires you to manage state files. You can choose to store remote state in [Azure Storage Account](https://docs.microsoft.com/en-us/azure/developer/terraform/store-state-in-azure-storage) or in [Terraform Cloud](https://www.terraform.io/cloud). Whichever solution you choose, be sure to update the [`backend.tf`](backend.tf) file to reflect your remote state solution. This repo uses Terraform Cloud and for the GitHub Action to work with your Terraform Cloud account, you will need to create an [API token](https://www.terraform.io/docs/cloud/users-teams-organizations/users.html#api-tokens) and save it as a [GitHub Secret](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository) named `TF_API_TOKEN`.
+Terraform requires you to manage state files. You can choose to store remote state in [Azure Storage Account][tfazstorage] or in [Terraform Cloud][tfcloud]. Whichever solution you choose, be sure to update the [`backend.tf`](backend.tf) file to reflect your remote state solution. This repo uses Terraform Cloud and for the GitHub Action to work with your Terraform Cloud account, you will need to create an [API token][tfcloudauth] and save it as a [GitHub Secret][githubsecrets] named `TF_API_TOKEN`.
 
-I chose to use Terraform Cloud storing remote state files. You also have the option of running your Terraform script on Terraform Cloud infrastructure, but I chose to run it locally on the GitHub self-hosted runner installed on my DevOps VM in Azure. This will enable the GitHub Action to use the Ansible inventory file when it comes time to call the Ansible playbook and reach AVD Session Host VMs by private IP as the self-hosted runner is deployed in a peered virtual network. Taking this route will require the use of an [Azure Service Principal](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret) to run the Terraform commands. Once you have the secret values, enter them in GitHub Secrets using the following names 
+I chose to use Terraform Cloud storing remote state files. You also have the option of running your Terraform script on Terraform Cloud infrastructure, but I chose to run it locally on the GitHub self-hosted runner installed on my DevOps VM in Azure. This will enable the GitHub Action to use the Ansible inventory file when it comes time to call the Ansible playbook and reach AVD Session Host VMs by private IP as the self-hosted runner is deployed in a peered virtual network. Taking this route will require the use of an [Azure Service Principal][azspn] to run the Terraform commands. Once you have the secret values, enter them in [GitHub Secrets][githubsecrets] using the following names
 
 - `ARM_CLIENT_ID`
 - `ARM_CLIENT_SECRET`
@@ -65,7 +65,7 @@ To run the Terrafrom script locally, take a look at the [`terraform.yml`](./gith
 
 ## Ansible Setup
 
-The `site.yml` [Ansible Playbook](https://docs.ansible.com/ansible/latest/user_guide/playbooks.html) found in this repo relies on a few variables needed to connect to your VM, install the RDSAgent software for registering it as a AVD Session Host, and performing a domain join. Rather then saving credentials to the repo (which is never a good thing), we'll use `ansible-vault` to encrypt contents leveraging [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html). The encrypted vault will be commited to the repo as `secrets.yml`. 
+The `site.yml` [Ansible Playbook][ansplaybook] found in this repo relies on a few variables needed to connect to your VM, install the RDSAgent software for registering it as a AVD Session Host, and performing a domain join. Rather then saving credentials to the repo (which is never a good thing), we'll use `ansible-vault` to encrypt contents leveraging [Ansible Vault][ansvault]. The encrypted vault will be commited to the repo as `secrets.yml`.
 
 > NOTE: `secrets.yml` file in this repo contains info specific to my deployment so you'll need to overwrite it with your own.
 
@@ -79,7 +79,7 @@ You will be prompted for a password. Enter a super-secret password. Make it hard
 
 > NOTE: You will also need to save the vault password as a GitHub repo Secret named `ANSIBLE_VAULT_PASSWORD` for the GitHub Action workflow to use.
 
-After the vault password has been set, a VI editor will open. 
+After the vault password has been set, a VI editor will open.
 
 > NOTE: Be sure to hit the `i` key to put yourself in `insert` mode and enter the following:
 
@@ -104,16 +104,16 @@ ansible-vault edit secrets.yml
 
 With the vault file saved to the repo, the GitHub Action workflow will use the `ANSIBLE_VAULT_PASSWORD` to unlock the vault when the Ansible playbook is invoked.
 
-To view the Ansible playbook command, take a look at the [`terraform.yml`](./github/workflows/terraform.yml) workflow file and look for the Ansible Playbook task. You'll see that the command passes extra variables for the Host Pool registratin token and passes the variables found in `secrets.yml` vault file into the playbook. 
+To view the Ansible playbook command, take a look at the [`terraform.yml`](./github/workflows/terraform.yml) workflow file and look for the Ansible Playbook task. You'll see that the command passes extra variables for the Host Pool registratin token and passes the variables found in `secrets.yml` vault file into the playbook.
 
 More on Ansible Secrets here:
 
-- [Encrypting content with Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
-- [Handling secrets in your Ansible playbooks](https://www.redhat.com/sysadmin/ansible-playbooks-secrets)
+- [Encrypting content with Ansible Vault][ansvault]
+- [Handling secrets in your Ansible playbooks][anssecrets]
 
 ### GitHub Action Setup
 
-If you configured all the secrets (listed in steps above), you will see a GitHub Action workflow running each time you do a push or pull request into the main branch. At this point, there's nothing else you need to do here. Now, go watch it run and have fun!!
+If you configured all the [GitHub secrets][githubsecrets] (listed in steps above), you will see a GitHub Action workflow running each time you do a push or pull request into the main branch. At this point, there's nothing else you need to do here. Now, go watch it run and have fun!!
 
 ## Clean Up
 
@@ -134,3 +134,21 @@ terraform destroy -var-file=sample.tfvars -var=username=user -var=password=pass
 [ansible]:https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-and-upgrading-ansible-with-pip
 [nodejs]:https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
 [npm]:https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+[azrg]:https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal
+[azvnet]:https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview
+[aznsg]:https://docs.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview
+[azdns]:https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances
+[azvnetpeer]:https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering
+[avdhp]:https://docs.microsoft.com/en-us/azure/virtual-desktop/create-host-pools-azure-marketplace
+[avdag]:https://docs.microsoft.com/en-us/azure/virtual-desktop/manage-app-groups
+[azwinvm]:https://docs.microsoft.com/en-us/azure/virtual-machines/windows/quick-create-portal
+[azvmcse]:https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-windows
+[answinrm]:https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html
+[tfazstorage]:https://docs.microsoft.com/en-us/azure/developer/terraform/store-state-in-azure-storage
+[tfcloud]:https://www.terraform.io/cloud
+[tfcloudauth]:https://www.terraform.io/docs/cloud/users-teams-organizations/users.html#api-tokens
+[githubsecrets]:https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository
+[azspn]:https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret
+[ansplaybook]:https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
+[ansvault]:https://docs.ansible.com/ansible/latest/user_guide/vault.html
+[anssecrets]:https://www.redhat.com/sysadmin/ansible-playbooks-secrets
