@@ -2,13 +2,13 @@ provider "azurerm" {
   features {}
 }
 
-resource "random_pet" "wvd" {
+resource "random_pet" "avd" {
   length    = 2
   separator = ""
 }
 
-resource "azurerm_resource_group" "wvd" {
-  name     = "rg-${random_pet.wvd.id}"
+resource "azurerm_resource_group" "avd" {
+  name     = "rg-${random_pet.avd.id}"
   location = var.location
   tags     = var.tags
 }
@@ -17,32 +17,32 @@ resource "azurerm_resource_group" "wvd" {
 # VIRTUAL NETWORKING
 ##############################################
 
-resource "azurerm_virtual_network" "wvd" {
-  name                = "vn-${random_pet.wvd.id}"
-  resource_group_name = azurerm_resource_group.wvd.name
-  location            = azurerm_resource_group.wvd.location
+resource "azurerm_virtual_network" "avd" {
+  name                = "vn-${random_pet.avd.id}"
+  resource_group_name = azurerm_resource_group.avd.name
+  location            = azurerm_resource_group.avd.location
   tags                = var.tags
   address_space       = var.vnet_address_space
   dns_servers         = var.vnet_custom_dns_servers
 }
 
-resource "azurerm_subnet" "wvd" {
-  name                 = "sn-${random_pet.wvd.id}"
-  resource_group_name  = azurerm_resource_group.wvd.name
-  virtual_network_name = azurerm_virtual_network.wvd.name
+resource "azurerm_subnet" "avd" {
+  name                 = "sn-${random_pet.avd.id}"
+  resource_group_name  = azurerm_resource_group.avd.name
+  virtual_network_name = azurerm_virtual_network.avd.name
   address_prefixes     = var.snet_address_space
 }
 
-resource "azurerm_network_security_group" "wvd" {
-  name                = "nsg-${random_pet.wvd.id}"
-  resource_group_name = azurerm_resource_group.wvd.name
-  location            = azurerm_resource_group.wvd.location
+resource "azurerm_network_security_group" "avd" {
+  name                = "nsg-${random_pet.avd.id}"
+  resource_group_name = azurerm_resource_group.avd.name
+  location            = azurerm_resource_group.avd.location
   tags                = var.tags
 }
 
-resource "azurerm_subnet_network_security_group_association" "wvd" {
-  subnet_id                 = azurerm_subnet.wvd.id
-  network_security_group_id = azurerm_network_security_group.wvd.id
+resource "azurerm_subnet_network_security_group_association" "avd" {
+  subnet_id                 = azurerm_subnet.avd.id
+  network_security_group_id = azurerm_network_security_group.avd.id
 }
 
 ##########################################
@@ -54,17 +54,17 @@ data "azurerm_resources" "vnets" {
   type = "Microsoft.Network/virtualNetworks"
 
   required_tags = {
-    environment = "prod"
-    role        = "azops"
+    role = "hubcity"
+    role = "devops"
   }
 }
 
 resource "azurerm_virtual_network_peering" "out" {
   count                        = length(data.azurerm_resources.vnets.resources)
-  name                         = "${azurerm_virtual_network.wvd.name}-to-${data.azurerm_resources.vnets.resources[count.index].name}"
+  name                         = "${azurerm_virtual_network.avd.name}-to-${data.azurerm_resources.vnets.resources[count.index].name}"
   remote_virtual_network_id    = data.azurerm_resources.vnets.resources[count.index].id
-  resource_group_name          = azurerm_resource_group.wvd.name
-  virtual_network_name         = azurerm_virtual_network.wvd.name
+  resource_group_name          = azurerm_resource_group.avd.name
+  virtual_network_name         = azurerm_virtual_network.avd.name
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
   allow_gateway_transit        = false
@@ -73,8 +73,8 @@ resource "azurerm_virtual_network_peering" "out" {
 
 resource "azurerm_virtual_network_peering" "in" {
   for_each                     = { for vp in var.vnet_peerings : vp.vnet_name => vp }
-  name                         = "${each.value["vnet_name"]}-to-${azurerm_virtual_network.wvd.name}"
-  remote_virtual_network_id    = azurerm_virtual_network.wvd.id
+  name                         = "${each.value["vnet_name"]}-to-${azurerm_virtual_network.avd.name}"
+  remote_virtual_network_id    = azurerm_virtual_network.avd.id
   resource_group_name          = each.value["vnet_resource_group_name"]
   virtual_network_name         = each.value["vnet_name"]
   allow_virtual_network_access = true
@@ -87,10 +87,10 @@ resource "azurerm_virtual_network_peering" "in" {
 # WINDOWS VIRTUAL DESKTOP
 ##############################################
 
-resource "azurerm_virtual_desktop_host_pool" "wvd" {
-  name                     = "hp-${random_pet.wvd.id}"
-  resource_group_name      = azurerm_resource_group.wvd.name
-  location                 = azurerm_resource_group.wvd.location
+resource "azurerm_virtual_desktop_host_pool" "avd" {
+  name                     = "hp-${random_pet.avd.id}"
+  resource_group_name      = azurerm_resource_group.avd.name
+  location                 = azurerm_resource_group.avd.location
   type                     = var.host_pool_type
   load_balancer_type       = var.host_pool_load_balancer_type
   validate_environment     = var.host_pool_validate_environment
@@ -104,25 +104,25 @@ resource "azurerm_virtual_desktop_host_pool" "wvd" {
 # Both desktop and remote app application groups are being joined to a single host pool
 # however, in production scenario, these should join to separate host pools
 
-resource "azurerm_virtual_desktop_application_group" "wvd" {
-  name                = "ag-${random_pet.wvd.id}"
-  resource_group_name = azurerm_resource_group.wvd.name
-  location            = azurerm_resource_group.wvd.location
-  host_pool_id        = azurerm_virtual_desktop_host_pool.wvd.id
+resource "azurerm_virtual_desktop_application_group" "avd" {
+  name                = "ag-${random_pet.avd.id}"
+  resource_group_name = azurerm_resource_group.avd.name
+  location            = azurerm_resource_group.avd.location
+  host_pool_id        = azurerm_virtual_desktop_host_pool.avd.id
   type                = var.desktop_app_group_type
-  friendly_name       = upper(random_pet.wvd.id)
+  friendly_name       = upper(random_pet.avd.id)
 }
 
-resource "azurerm_virtual_desktop_workspace" "wvd" {
-  name                = "ws-${random_pet.wvd.id}"
-  resource_group_name = azurerm_resource_group.wvd.name
-  location            = azurerm_resource_group.wvd.location
-  friendly_name       = upper(random_pet.wvd.id)
+resource "azurerm_virtual_desktop_workspace" "avd" {
+  name                = "ws-${random_pet.avd.id}"
+  resource_group_name = azurerm_resource_group.avd.name
+  location            = azurerm_resource_group.avd.location
+  friendly_name       = upper(random_pet.avd.id)
 }
 
-resource "azurerm_virtual_desktop_workspace_application_group_association" "wvd" {
-  workspace_id         = azurerm_virtual_desktop_workspace.wvd.id
-  application_group_id = azurerm_virtual_desktop_application_group.wvd.id
+resource "azurerm_virtual_desktop_workspace_application_group_association" "avd" {
+  workspace_id         = azurerm_virtual_desktop_workspace.avd.id
+  application_group_id = azurerm_virtual_desktop_application_group.avd.id
 }
 
 ##############################################
@@ -131,49 +131,49 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "wvd"
 
 # Make sure the VM name prefix doesn't exceed 12 characters
 locals {
-  vm_name = substr(format("vm%s", random_pet.wvd.id), 0, 12)
+  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 12)
 }
 
-resource "azurerm_network_interface" "wvd" {
+resource "azurerm_network_interface" "avd" {
   count               = var.vm_count
   name                = "${local.vm_name}-${count.index + 1}_nic"
-  resource_group_name = azurerm_resource_group.wvd.name
-  location            = azurerm_resource_group.wvd.location
+  resource_group_name = azurerm_resource_group.avd.name
+  location            = azurerm_resource_group.avd.location
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     = azurerm_subnet.wvd.id
+    subnet_id                     = azurerm_subnet.avd.id
     private_ip_address_allocation = "dynamic"
   }
 
   tags = var.tags
 }
 
-# data "azurerm_shared_image" "wvd" {
+# data "azurerm_shared_image" "avd" {
 #   name                = var.sig_image_name
 #   gallery_name        = var.sig_name
 #   resource_group_name = var.sig_resource_group_name
 # }
 
-# data "azurerm_shared_image_version" "wvd" {
+# data "azurerm_shared_image_version" "avd" {
 #   name                = "latest"
 #   image_name          = var.sig_image_name
 #   gallery_name        = var.sig_name
 #   resource_group_name = var.sig_resource_group_name
 # }
 
-resource "azurerm_windows_virtual_machine" "wvd" {
+resource "azurerm_windows_virtual_machine" "avd" {
   count               = var.vm_count
   name                = "${local.vm_name}-${count.index + 1}"
-  resource_group_name = azurerm_resource_group.wvd.name
-  location            = azurerm_resource_group.wvd.location
+  resource_group_name = azurerm_resource_group.avd.name
+  location            = azurerm_resource_group.avd.location
   size                = var.vm_sku
   admin_username      = var.username
   admin_password      = var.password
-  tags                = merge(var.tags, { "role" = "WVDSessionHost" })
+  tags                = merge(var.tags, { "role" = "AVDSessionHost" })
 
   network_interface_ids = [
-    element(azurerm_network_interface.wvd.*.id, count.index)
+    element(azurerm_network_interface.avd.*.id, count.index)
   ]
 
   os_disk {
@@ -189,7 +189,7 @@ resource "azurerm_windows_virtual_machine" "wvd" {
     version   = var.vm_image.version
   }
 
-  #source_image_id = data.azurerm_shared_image_version.wvd.id
+  #source_image_id = data.azurerm_shared_image_version.avd.id
 
   identity {
     type = "SystemAssigned"
@@ -207,10 +207,10 @@ resource "azurerm_windows_virtual_machine" "wvd" {
 
 # Install WinRM for Ansible
 # https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-windows
-resource "azurerm_virtual_machine_extension" "wvd" {
-  count                      = length(azurerm_windows_virtual_machine.wvd)
+resource "azurerm_virtual_machine_extension" "avd" {
+  count                      = length(azurerm_windows_virtual_machine.avd)
   name                       = "AnsibleWinRM"
-  virtual_machine_id         = azurerm_windows_virtual_machine.wvd[count.index].id
+  virtual_machine_id         = azurerm_windows_virtual_machine.avd[count.index].id
   publisher                  = "Microsoft.Compute"
   type                       = "CustomScriptExtension"
   type_handler_version       = "1.10"
@@ -240,12 +240,12 @@ resource "azurerm_virtual_machine_extension" "wvd" {
 # BUILD ANSIBLE INVENTORY
 ################################
 
-resource "local_file" "wvd" {
+resource "local_file" "avd" {
   filename = "ansible/inventory"
 
   content = templatefile("ansible/template-inventory.tpl",
     {
-      hosts = zipmap(azurerm_windows_virtual_machine.wvd.*.name, azurerm_network_interface.wvd.*.private_ip_address),
+      hosts = zipmap(azurerm_windows_virtual_machine.avd.*.name, azurerm_network_interface.avd.*.private_ip_address),
     }
   )
 }

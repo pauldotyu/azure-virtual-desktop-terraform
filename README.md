@@ -1,14 +1,14 @@
-# azure-wvd-terraform
+# azure-avd-terraform
 
-This basic implementation of Windows Virtual Desktop in Azure will be deployed using Terraform for Azure resource provisioning, Ansible for Windows configuration, and GitHub Actions for automation.
+This basic implementation of Azure Virtual Desktop will be deployed using Terraform for Azure resource provisioning, Ansible for Windows configuration, and GitHub Actions for automation.
 
-Only the resources resources in the Windows Virtual Desktop Resource Group depicted in the middle of the diagram below, are within scope for this deployment.
+Only the resources resources in the Azure Virtual Desktop Resource Group depicted in the middle of the diagram below, are within scope for this deployment.
 
 ![Architecture](images/architecture.png)
 
 ## Prerequisites
 
-To deploy the demo WVD solution within your environment, you will need to have the following resources in place:
+To deploy the demo AVD solution within your environment, you will need to have the following resources in place:
 
 1. A Windows Active Directory Domain Services Domain Controller or [Azure Active Directory Domain Services](https://azure.microsoft.com/en-us/services/active-directory-ds/) deployed in Azure.
 1. A [GitHub Account](https://github.com/join) to [clone](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github/cloning-a-repository) this repo or [create a new repo from this template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template).
@@ -22,7 +22,7 @@ To deploy the demo WVD solution within your environment, you will need to have t
     - [Node.js](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
     - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
-> The Terraform script will dynamically peer the WVD virtual network with any virtual network with the tag `role=azops` so make sure the virtual networks that host your **AD** and **DEVOPS** machines are tagged as such.
+> The Terraform script will dynamically peer the AVD virtual network with any virtual network with the tag `role=azops` so make sure the virtual networks that host your **AD** and **DEVOPS** machines are tagged as such.
 
 ## Overview
 
@@ -30,17 +30,17 @@ The Terraform configuration will generate a "random pet name" to be used in nami
 
 All Azure resources will be named using a naming convention of 2-4 character code based on the Azure service as the name prefix followed by a dash and the "random pet name". Again, if you don't like these names, you should change it.
 
-This deployment also assumes you have full control of your subscription and have the proper permissions to create two sets of Azure Virtual Network Peerings; one between the WVD Virtual Network and AADDS Virtual Network and another between the WVD Virtual Network and DevOps virtual networks. If you don't have this level of access, you'll need to re-evaluate how much of this you can automate. I am working out of my sandbox Azure subscription and do not have limitations which you may run into in a production scenario.
+This deployment also assumes you have full control of your subscription and have the proper permissions to create two sets of Azure Virtual Network Peerings; one between the AVD Virtual Network and AADDS Virtual Network and another between the AVD Virtual Network and DevOps virtual networks. If you don't have this level of access, you'll need to re-evaluate how much of this you can automate. I am working out of my sandbox Azure subscription and do not have limitations which you may run into in a production scenario.
 
 The following resources will be deployed using Terraform:
 
 - [Azure Resource Group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal)
 - [Azure Virtual Network](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview) with a single subnet and [Network Security Group](https://docs.microsoft.com/en-us/azure/virtual-network/network-security-groups-overview) wrapped around it
-    > The virtual network will also have [custom DNS configured](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances) so that your WVD session host VM can communicate with the domain controller when it comes time to domain join.
-- [Azure Virtual Network peerings](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering) to and from WVD virtual network for AADDS and DevOps
-- [Windows Virtual Desktop Host Pool](https://docs.microsoft.com/en-us/azure/virtual-desktop/create-host-pools-azure-marketplace) and the host pool registration token will be exported as an output in the Terraform configuration
-- [Windows Virtual Desktop Application Group](https://docs.microsoft.com/en-us/azure/virtual-desktop/manage-app-groups)
-- Windows Virtual Desktop Workspace
+    > The virtual network will also have [custom DNS configured](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-for-vms-and-role-instances) so that your AVD session host VM can communicate with the domain controller when it comes time to domain join.
+- [Azure Virtual Network peerings](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering) to and from AVD virtual network for AADDS and DevOps
+- [Azure Virtual Desktop Host Pool](https://docs.microsoft.com/en-us/azure/virtual-desktop/create-host-pools-azure-marketplace) and the host pool registration token will be exported as an output in the Terraform configuration
+- [Azure Virtual Desktop Application Group](https://docs.microsoft.com/en-us/azure/virtual-desktop/manage-app-groups)
+- Azure Virtual Desktop Workspace
 - [Windows Virtual Machine(s)](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/quick-create-portal) with a [Custom Script Extension](https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-windows) to configure [WinRM for Ansible](https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html)
 - A local Ansible inventory file which will include host name and IP to run the Ansible playbook against
 
@@ -48,7 +48,7 @@ The following resources will be deployed using Terraform:
 
 Terraform requires you to manage state files. You can choose to store remote state in [Azure Storage Account](https://docs.microsoft.com/en-us/azure/developer/terraform/store-state-in-azure-storage) or in [Terraform Cloud](https://www.terraform.io/cloud). Whichever solution you choose, be sure to update the [`backend.tf`](backend.tf) file to reflect your remote state solution. This repo uses Terraform Cloud and for the GitHub Action to work with your Terraform Cloud account, you will need to create an [API token](https://www.terraform.io/docs/cloud/users-teams-organizations/users.html#api-tokens) and save it as a [GitHub Secret](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository) named `TF_API_TOKEN`.
 
-I chose to use Terraform Cloud storing remote state files. You also have the option of running your Terraform script on Terraform Cloud infrastructure, but I chose to run it locally on the GitHub self-hosted runner installed on my DevOps VM in Azure. This will enable the GitHub Action to use the Ansible inventory file when it comes time to call the Ansible playbook and reach WVD Session Host VMs by private IP as the self-hosted runner is deployed in a peered virtual network. Taking this route will require the use of an [Azure Service Principal](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret) to run the Terraform commands. Once you have the secret values, enter them in GitHub Secrets using the following names 
+I chose to use Terraform Cloud storing remote state files. You also have the option of running your Terraform script on Terraform Cloud infrastructure, but I chose to run it locally on the GitHub self-hosted runner installed on my DevOps VM in Azure. This will enable the GitHub Action to use the Ansible inventory file when it comes time to call the Ansible playbook and reach AVD Session Host VMs by private IP as the self-hosted runner is deployed in a peered virtual network. Taking this route will require the use of an [Azure Service Principal](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret) to run the Terraform commands. Once you have the secret values, enter them in GitHub Secrets using the following names 
 
 - `ARM_CLIENT_ID`
 - `ARM_CLIENT_SECRET`
@@ -65,7 +65,7 @@ To run the Terrafrom script locally, take a look at the [`terraform.yml`](./gith
 
 ## Ansible Setup
 
-The `site.yml` [Ansible Playbook](https://docs.ansible.com/ansible/latest/user_guide/playbooks.html) found in this repo relies on a few variables needed to connect to your VM, install the RDSAgent software for registering it as a WVD Session Host, and performing a domain join. Rather then saving credentials to the repo (which is never a good thing), we'll use `ansible-vault` to encrypt contents leveraging [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html). The encrypted vault will be commited to the repo as `secrets.yml`. 
+The `site.yml` [Ansible Playbook](https://docs.ansible.com/ansible/latest/user_guide/playbooks.html) found in this repo relies on a few variables needed to connect to your VM, install the RDSAgent software for registering it as a AVD Session Host, and performing a domain join. Rather then saving credentials to the repo (which is never a good thing), we'll use `ansible-vault` to encrypt contents leveraging [Ansible Vault](https://docs.ansible.com/ansible/latest/user_guide/vault.html). The encrypted vault will be commited to the repo as `secrets.yml`. 
 
 > NOTE: `secrets.yml` file in this repo contains info specific to my deployment so you'll need to overwrite it with your own.
 
