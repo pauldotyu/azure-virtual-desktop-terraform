@@ -1,13 +1,13 @@
 ---
-- name: Windows Virtual Desktop Setup
+- name: Azure Virtual Desktop Setup
   hosts: winclient
   gather_facts: yes
   tasks:
-    - name: Download Windows Virtual Desktop Agent
+    - name: Download Azure Virtual Desktop Agent
       ansible.windows.win_get_url:
         url: https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrmXv
         dest: C:\RDAgent.msi
-    - name: Install Windows Virtual Desktop Agent
+    - name: Install Azure Virtual Desktop Agent
       ansible.windows.win_package:
         path: C:\RDAgent.msi
         provider: auto
@@ -19,11 +19,11 @@
           - REGISTRATIONTOKEN={{ registration_token }}
         state: present
         log_path: C:\Users\AgentInstall.txt
-    - name: Download Windows Virtual Desktop Agent Boot Loader
+    - name: Download Azure Virtual Desktop Agent Boot Loader
       ansible.windows.win_get_url:
         url: https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWrxrH
         dest: C:\RDAgentBootLoader.msi
-    - name: Install Windows Virtual Desktop Agent Boot Loader
+    - name: Install Azure Virtual Desktop Agent Boot Loader
       ansible.windows.win_package:
         path: C:\RDAgentBootLoader.msi
         provider: auto

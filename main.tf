@@ -83,7 +83,7 @@ resource "azurerm_virtual_network_peering" "in" {
 }
 
 ##############################################
-# WINDOWS VIRTUAL DESKTOP
+# AZURE VIRTUAL DESKTOP
 ##############################################
 
 resource "azurerm_virtual_desktop_host_pool" "avd" {
@@ -125,7 +125,7 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "avd"
 }
 
 ##############################################
-# WINDOWS VIRTUAL DESKTOP - SESSION HOSTS
+# AZURE VIRTUAL DESKTOP - SESSION HOSTS
 ##############################################
 
 # Make sure the VM name prefix doesn't exceed 12 characters
@@ -201,7 +201,7 @@ resource "azurerm_windows_virtual_machine" "avd" {
 }
 
 ##################################################################
-# WINDOWS VIRTUAL DESKTOP - SESSION HOST ANSIBLE CONFIGURATION
+# AZURE VIRTUAL DESKTOP - SESSION HOST ANSIBLE CONFIGURATION
 ##################################################################
 
 # Install WinRM for Ansible
