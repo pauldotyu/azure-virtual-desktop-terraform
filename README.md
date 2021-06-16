@@ -1,26 +1,26 @@
 # azure-avd-terraform
 
-This basic implementation of Azure Virtual Desktop will be deployed using Terraform for Azure resource provisioning, Ansible for Windows configuration, and GitHub Actions for automation.
+This basic implementation of Azure Virtual Desktop will be deployed using Terraform for Azure resource provisioning, Ansible for Windows session host configuration, and GitHub Actions to orchestrate it all.
 
-Only the resources resources in the Azure Virtual Desktop Resource Group depicted in the middle of the diagram below, are within scope for this deployment.
+Only the resources resources in the Azure Virtual Desktop Resource Group (illustrated in the middle of the diagram below) are within scope for this deployment.
 
-![Architecture](images/architecture.png)
+![Architecture](media/architecture.png)
 
 ## Prerequisites
 
-To deploy the demo AVD solution within your environment, you will need to have the following resources in place:
+To deploy this demo AVD solution within your environment, I am assuming you have the following resources in place:
 
-1. A Windows Active Directory Domain Services Domain Controller or [Azure Active Directory Domain Services](https://azure.microsoft.com/en-us/services/active-directory-ds/) deployed in Azure.
-1. A [GitHub Account](https://github.com/join) to [clone](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github/cloning-a-repository) this repo or [create a new repo from this template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template).
-1. A [Ubuntu Virtual Machine](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-portal) deployed in Azure with the following tools installed:
-    - [GitHub Actions self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
-    - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt)
-    - [Terraform](https://www.terraform.io/docs/cli/install/apt.html)
-    - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-and-upgrading-ansible-with-pip)
-    - Unzip 
-        > `sudo apt-get install unzip` 
-    - [Node.js](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
-    - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+1. A Windows Active Directory Domain Services Domain Controller or [Azure Active Directory Domain Services][aadds] deployed in Azure.
+1. A [GitHub Account][github] to [clone][gitclone] this repo or [create a new repo from this template][gittemplate].
+1. A [Ubuntu Virtual Machine][azlinuxvm] deployed in Azure with the following tools installed:
+    - [GitHub Actions self-hosted runner][githubrunner]
+    - [Azure CLI][azcli]
+    - [Terraform][tf]
+    - [Ansible][ansible]
+    - Unzip
+        > `sudo apt-get install unzip`
+    - [Node.js][nodejs]
+    - [npm][npm]
 
 > The Terraform script will dynamically peer the AVD virtual network with any virtual network with the tag `role=azops` so make sure the virtual networks that host your **AD** and **DEVOPS** machines are tagged as such.
 
@@ -122,3 +122,15 @@ When you are ready to clean things up, you can run the following command:
 ```sh
 terraform destroy -var-file=sample.tfvars -var=username=user -var=password=pass
 ```
+
+[aadds]:https://azure.microsoft.com/en-us/services/active-directory-ds/
+[github]:https://github.com/join
+[gitclone]:https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github/cloning-a-repository
+[gittemplate]:https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template
+[azlinuxvm]:https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-portal
+[githubrunner]:https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners
+[azcli]:https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+[tf]:https://www.terraform.io/docs/cli/install/apt.html
+[ansible]:https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-and-upgrading-ansible-with-pip
+[nodejs]:https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
+[npm]:https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
