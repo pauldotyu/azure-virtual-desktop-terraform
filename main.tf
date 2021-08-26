@@ -49,7 +49,7 @@ resource "azurerm_subnet_network_security_group_association" "avd" {
 # VIRTUAL NETWORK PEERING
 ##########################################
 
-# Get resources by type, create spoke vnet peerings
+# Get resources by type, create vnet peerings
 data "azurerm_resources" "vnets" {
   type = "Microsoft.Network/virtualNetworks"
 
@@ -58,6 +58,7 @@ data "azurerm_resources" "vnets" {
   }
 }
 
+// this will peer out to all the virtual networks tagged with a role of azops
 resource "azurerm_virtual_network_peering" "out" {
   count                        = length(data.azurerm_resources.vnets.resources)
   name                         = "${azurerm_virtual_network.avd.name}-to-${data.azurerm_resources.vnets.resources[count.index].name}"
@@ -70,6 +71,8 @@ resource "azurerm_virtual_network_peering" "out" {
   use_remote_gateways          = false
 }
 
+// this will peer in from all the virtual networks tagged with the role of azops
+// this also needs work. right now it is using variables when it should be using the data resource pulled from above; howver, the challenge is that the data resource does not return the resrouces' resource group which is required for peering
 resource "azurerm_virtual_network_peering" "in" {
   for_each                     = { for vp in var.vnet_peerings : vp.vnet_name => vp }
   name                         = "${each.value["vnet_name"]}-to-${azurerm_virtual_network.avd.name}"
