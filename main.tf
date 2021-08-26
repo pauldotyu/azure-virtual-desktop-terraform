@@ -54,7 +54,7 @@ data "azurerm_resources" "vnets" {
   type = "Microsoft.Network/virtualNetworks"
 
   required_tags = {
-    role = "azops"
+    network-role = "hubcity"
   }
 }
 
