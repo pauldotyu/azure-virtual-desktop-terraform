@@ -164,6 +164,13 @@ resource "azurerm_network_interface" "avd" {
 #   resource_group_name = var.sig_resource_group_name
 # }
 
+data "azurerm_shared_image" "avd" {
+  name                = "avd-ethicalbedbug"
+  gallery_name        = "sigethicalbedbug"
+  resource_group_name = "rg-ethicalbedbug"
+}
+
+
 resource "azurerm_windows_virtual_machine" "avd" {
   count               = var.vm_count
   name                = "${local.vm_name}-${count.index + 1}"
@@ -184,12 +191,14 @@ resource "azurerm_windows_virtual_machine" "avd" {
     storage_account_type = var.vm_os_disk_caching.storage_account_type
   }
 
-  source_image_reference {
-    publisher = var.vm_image.publisher
-    offer     = var.vm_image.offer
-    sku       = var.vm_image.sku
-    version   = var.vm_image.version
-  }
+  source_image_id = data.azurerm_shared_image.avd.id
+
+  # source_image_reference {
+  #   publisher = var.vm_image.publisher
+  #   offer     = var.vm_image.offer
+  #   sku       = var.vm_image.sku
+  #   version   = var.vm_image.version
+  # }
 
   #source_image_id = data.azurerm_shared_image_version.avd.id
 
@@ -228,7 +237,7 @@ resource "azurerm_virtual_machine_extension" "avd" {
 
   protected_settings = <<PROTECTED_SETTINGS
     {
-      "commandToExecute": "powershell.exe -Command \"./ConfigureRemotingForAnsible.ps1; exit 0;\""
+      "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -Command \"./ConfigureRemotingForAnsible.ps1; exit 0;\""
     }
   PROTECTED_SETTINGS
 
