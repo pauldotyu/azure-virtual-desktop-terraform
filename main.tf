@@ -133,7 +133,7 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "avd"
 
 # Make sure the VM name prefix doesn't exceed 12 characters
 locals {
-  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 11)
+  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 10)
 }
 
 resource "azurerm_network_interface" "avd" {
@@ -229,7 +229,7 @@ resource "azurerm_virtual_machine_extension" "avd" {
 
   protected_settings = <<PROTECTED_SETTINGS
     {
-      "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -Command \"./ConfigureRemotingForAnsible.ps1; exit 0;\""
+      "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -Command \"./ConfigureRemotingForAnsible.ps1 -SkipNetworkProfileCheck -Verbose; exit 0;\""
     }
   PROTECTED_SETTINGS
 
