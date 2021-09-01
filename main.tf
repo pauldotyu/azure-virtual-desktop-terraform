@@ -133,7 +133,7 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "avd"
 
 # Make sure the VM name prefix doesn't exceed 12 characters
 locals {
-  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 10)
+  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 12)
 }
 
 resource "azurerm_network_interface" "avd" {
@@ -210,34 +210,34 @@ resource "azurerm_windows_virtual_machine" "avd" {
 
 # Install WinRM for Ansible
 # https://docs.microsoft.com/en-us/azure/virtual-machines/extensions/custom-script-windows
-resource "azurerm_virtual_machine_extension" "avd" {
-  count                      = length(azurerm_windows_virtual_machine.avd)
-  name                       = "AnsibleWinRM"
-  virtual_machine_id         = azurerm_windows_virtual_machine.avd[count.index].id
-  publisher                  = "Microsoft.Compute"
-  type                       = "CustomScriptExtension"
-  type_handler_version       = "1.10"
-  auto_upgrade_minor_version = true
+# resource "azurerm_virtual_machine_extension" "avd" {
+#   count                      = length(azurerm_windows_virtual_machine.avd)
+#   name                       = "AnsibleWinRM"
+#   virtual_machine_id         = azurerm_windows_virtual_machine.avd[count.index].id
+#   publisher                  = "Microsoft.Compute"
+#   type                       = "CustomScriptExtension"
+#   type_handler_version       = "1.10"
+#   auto_upgrade_minor_version = true
 
-  settings = <<SETTINGS
-    {
-      "fileUris": [
-          "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
-        ]
-    }
-  SETTINGS
+#   settings = <<SETTINGS
+#     {
+#       "fileUris": [
+#           "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
+#         ]
+#     }
+#   SETTINGS
 
-  protected_settings = <<PROTECTED_SETTINGS
-    {
-      "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -Command \"./ConfigureRemotingForAnsible.ps1 -EnableCredSSP -DisableBasicAuth -Verbose; exit 0;\""
-    }
-  PROTECTED_SETTINGS
+#   protected_settings = <<PROTECTED_SETTINGS
+#     {
+#       "commandToExecute": "powershell.exe -ExecutionPolicy Bypass -Command \"./ConfigureRemotingForAnsible.ps1 -EnableCredSSP -DisableBasicAuth -Verbose; exit 0;\""
+#     }
+#   PROTECTED_SETTINGS
 
-  depends_on = [
-    azurerm_virtual_network_peering.out,
-    azurerm_virtual_network_peering.in
-  ]
-}
+#   depends_on = [
+#     azurerm_virtual_network_peering.out,
+#     azurerm_virtual_network_peering.in
+#   ]
+# }
 
 ################################
 # BUILD ANSIBLE INVENTORY
