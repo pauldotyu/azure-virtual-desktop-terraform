@@ -191,15 +191,16 @@ resource "azurerm_windows_virtual_machine" "avd" {
     storage_account_type = var.vm_os_disk_caching.storage_account_type
   }
 
-  #source_image_id = data.azurerm_shared_image.avd.id
+  source_image_id = data.azurerm_shared_image.avd.id
   #source_image_id = data.azurerm_shared_image_version.avd.id
 
-  source_image_reference {
-    publisher = var.vm_image.publisher
-    offer     = var.vm_image.offer
-    sku       = var.vm_image.sku
-    version   = var.vm_image.version
-  }
+  # source_image_reference {
+  #   publisher = var.vm_image.publisher
+  #   offer     = var.vm_image.offer
+  #   sku       = var.vm_image.sku
+  #   version   = var.vm_image.version
+  # }
+
 
   identity {
     type = "SystemAssigned"
