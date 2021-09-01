@@ -192,7 +192,6 @@ resource "azurerm_windows_virtual_machine" "avd" {
   }
 
   source_image_id = data.azurerm_shared_image.avd.id
-  #source_image_id = data.azurerm_shared_image_version.avd.id
 
   # source_image_reference {
   #   publisher = var.vm_image.publisher
@@ -201,6 +200,7 @@ resource "azurerm_windows_virtual_machine" "avd" {
   #   version   = var.vm_image.version
   # }
 
+  #source_image_id = data.azurerm_shared_image_version.avd.id
 
   identity {
     type = "SystemAssigned"
@@ -237,7 +237,7 @@ resource "azurerm_virtual_machine_extension" "avd" {
 
   protected_settings = <<PROTECTED_SETTINGS
     {
-      "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File ConfigureRemotingForAnsible.ps1"
+      "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -Command \"./ConfigureRemotingForAnsible.ps1; exit 0;\""
     }
   PROTECTED_SETTINGS
 
