@@ -133,7 +133,7 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "avd"
 
 # Make sure the VM name prefix doesn't exceed 12 characters
 locals {
-  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 12)
+  vm_name = substr(format("vm%s", random_pet.avd.id), 0, 10)
 }
 
 resource "azurerm_network_interface" "avd" {
