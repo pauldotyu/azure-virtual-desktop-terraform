@@ -27,7 +27,7 @@ snet_address_space = ["10.21.17.0/28"]
 
 # VM Size
 vm_count = 1
-vm_sku   = "Standard_B2ms"
+vm_sku   = "Standard_D4s_v3"
 vm_os_disk_caching = {
   caching              = "ReadWrite"
   storage_account_type = "Standard_LRS"
@@ -41,7 +41,7 @@ vm_image = {
   version   = "latest"
 }
 
-# # Use either this or the image source above - still testing
-# sig_image_name          = "wvd-funburro"
-# sig_name                = "sigfunburro"
-# sig_resource_group_name = "rg-funburro"
+# Use either this or the image source above - still testing
+sig_image_name          = "avd-ethicalbedbug"
+sig_name                = "sigethicalbedbug"
+sig_resource_group_name = "rg-ethicalbedbug"

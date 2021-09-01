@@ -151,11 +151,11 @@ resource "azurerm_network_interface" "avd" {
   tags = var.tags
 }
 
-# data "azurerm_shared_image" "avd" {
-#   name                = var.sig_image_name
-#   gallery_name        = var.sig_name
-#   resource_group_name = var.sig_resource_group_name
-# }
+data "azurerm_shared_image" "avd" {
+  name                = var.sig_image_name
+  gallery_name        = var.sig_name
+  resource_group_name = var.sig_resource_group_name
+}
 
 # data "azurerm_shared_image_version" "avd" {
 #   name                = "latest"
@@ -163,13 +163,6 @@ resource "azurerm_network_interface" "avd" {
 #   gallery_name        = var.sig_name
 #   resource_group_name = var.sig_resource_group_name
 # }
-
-data "azurerm_shared_image" "avd" {
-  name                = "avd-ethicalbedbug"
-  gallery_name        = "sigethicalbedbug"
-  resource_group_name = "rg-ethicalbedbug"
-}
-
 
 resource "azurerm_windows_virtual_machine" "avd" {
   count               = var.vm_count
@@ -191,8 +184,6 @@ resource "azurerm_windows_virtual_machine" "avd" {
     storage_account_type = var.vm_os_disk_caching.storage_account_type
   }
 
-  source_image_id = data.azurerm_shared_image.avd.id
-
   # source_image_reference {
   #   publisher = var.vm_image.publisher
   #   offer     = var.vm_image.offer
@@ -200,6 +191,7 @@ resource "azurerm_windows_virtual_machine" "avd" {
   #   version   = var.vm_image.version
   # }
 
+  source_image_id = data.azurerm_shared_image.avd.id
   #source_image_id = data.azurerm_shared_image_version.avd.id
 
   identity {
