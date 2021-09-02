@@ -109,3 +109,19 @@ variable "sig_resource_group_name" {
   type        = string
   description = "Shared Image Gallery resource group name"
 }
+
+variable "domain_name" {
+  type = string
+}
+
+variable "domain_ou_path" {
+  type = string
+}
+
+variable "domain_username" {
+  type = string
+}
+
+variable "domain_password" {
+  type = string
+}

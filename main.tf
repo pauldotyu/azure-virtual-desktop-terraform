@@ -239,16 +239,92 @@ resource "azurerm_windows_virtual_machine" "avd" {
 #   ]
 # }
 
+# ################################
+# # BUILD ANSIBLE INVENTORY
+# ################################
+
+# resource "local_file" "avd" {
+#   filename = "ansible/inventory"
+
+#   content = templatefile("ansible/template-inventory.tpl",
+#     {
+#       hosts = zipmap(azurerm_windows_virtual_machine.avd.*.name, azurerm_network_interface.avd.*.private_ip_address),
+#     }
+#   )
+# }
+
 ################################
-# BUILD ANSIBLE INVENTORY
+# DOMAIN JOIN EXTENSION
 ################################
 
-resource "local_file" "avd" {
-  filename = "ansible/inventory"
+resource "azurerm_virtual_machine_extension" "domain_join" {
+  count                      = var.vm_count
+  name                       = "${local.vm_name}-${count.index + 1}-domainJoin"
+  virtual_machine_id         = azurerm_windows_virtual_machine.avd.*.id[count.index]
+  publisher                  = "Microsoft.Compute"
+  type                       = "JsonADDomainExtension"
+  type_handler_version       = "1.3"
+  auto_upgrade_minor_version = true
 
-  content = templatefile("ansible/template-inventory.tpl",
+  settings = <<SETTINGS
     {
-      hosts = zipmap(azurerm_windows_virtual_machine.avd.*.name, azurerm_network_interface.avd.*.private_ip_address),
+      "Name": "${var.domain_name}",
+      "OUPath": "${var.domain_ou_path}",
+      "User": "${var.domain_username}",
+      "Restart": "true",
+      "Options": "3"
     }
-  )
+SETTINGS
+
+  protected_settings = <<PROTECTED_SETTINGS
+    {
+      "Password": "${var.domain_password}"
+    }
+PROTECTED_SETTINGS
+
+  lifecycle {
+    ignore_changes = [settings, protected_settings]
+  }
+
+  depends_on = [
+    azurerm_virtual_network_peering.out,
+    azurerm_virtual_network_peering.in
+  ]
+}
+
+################################
+# AVD AGENT INSTALL EXTENSION
+################################
+
+resource "azurerm_virtual_machine_extension" "agent_install" {
+  count                      = var.vm_count
+  name                       = "${local.vm_name}-${count.index + 1}-avd_dsc"
+  virtual_machine_id         = azurerm_windows_virtual_machine.avd.*.id[count.index]
+  publisher                  = "Microsoft.Powershell"
+  type                       = "DSC"
+  type_handler_version       = "2.73"
+  auto_upgrade_minor_version = true
+
+  settings = <<-SETTINGS
+    {
+      "modulesUrl": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_3-10-2021.zip",
+      "configurationFunction": "Configuration.ps1\\AddSessionHost",
+      "properties": {
+        "HostPoolName":"${azurerm_virtual_desktop_host_pool.avd.name}"
+      }
+    }
+SETTINGS
+
+  protected_settings = <<PROTECTED_SETTINGS
+  {
+    "properties": {
+      "registrationInfoToken": "${azurerm_virtual_desktop_host_pool.avd.registration_info[0].token}"
+    }
+  }
+PROTECTED_SETTINGS
+
+  depends_on = [
+    azurerm_virtual_machine_extension.domain_join,
+    azurerm_virtual_desktop_host_pool.avd
+  ]
 }
