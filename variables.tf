@@ -124,4 +124,5 @@ variable "domain_username" {
 
 variable "domain_password" {
   type = string
+  sensitive = true
 }
