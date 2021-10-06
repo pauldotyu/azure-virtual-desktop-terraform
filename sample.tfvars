@@ -37,7 +37,7 @@ vm_os_disk_caching = {
 vm_image = {
   publisher = "microsoftwindowsdesktop"
   offer     = "office-365"
-  sku       = "20h2-evd-o365pp"
+  sku       = "win11-21h2-avd-m365"
   version   = "latest"
 }
 
