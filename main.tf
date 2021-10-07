@@ -99,7 +99,10 @@ resource "azurerm_virtual_desktop_host_pool" "avd" {
   maximum_sessions_allowed = var.host_pool_max_sessions_allowed
 
   registration_info {
-    expiration_date = timeadd(format("%sT00:00:00Z", formatdate("YYYY-MM-DD", timestamp())), "3600m")
+    expiration_date = timeadd(timestamp(), "648h")
+    # Need to extend this out to the max due to an issue where if the host pool registration token has expired on the Azure side,
+    # a null value is returned as Terraform refreshes state. If the value is null, you will need to regen the token from Azure portal or using this command
+    # https://github.com/hashicorp/terraform-provider-azurerm/issues/12038
   }
 }
 

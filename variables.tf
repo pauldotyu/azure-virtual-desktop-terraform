@@ -123,6 +123,6 @@ variable "domain_username" {
 }
 
 variable "domain_password" {
-  type = string
+  type      = string
   sensitive = true
 }
