@@ -109,3 +109,34 @@ variable "sig_resource_group_name" {
   type        = string
   description = "Shared Image Gallery resource group name"
 }
+
+variable "configure_using_ansible" {
+  type        = bool
+  description = "Set this to true if you want to use Ansible to perform the domain join and session host agent installation"
+  default     = false
+}
+
+####################################################
+# The variables listed below are only needed
+# if not using Ansible to configure session hosts
+####################################################
+variable "domain_name" {
+  type    = string
+  default = ""
+}
+
+variable "domain_ou_path" {
+  type    = string
+  default = ""
+}
+
+variable "domain_username" {
+  type    = string
+  default = ""
+}
+
+variable "domain_password" {
+  type      = string
+  sensitive = true
+  default   = ""
+}
