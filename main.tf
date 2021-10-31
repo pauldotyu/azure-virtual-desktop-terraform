@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "=2.82.0"
+    }
+  }
+}
+
 provider "azurerm" {
   features {}
 }
@@ -100,7 +109,8 @@ resource "azurerm_virtual_desktop_host_pool" "avd" {
   maximum_sessions_allowed = var.host_pool_max_sessions_allowed
 
   registration_info {
-    expiration_date = timeadd(timestamp(), "648h")
+    #expiration_date = timeadd(timestamp(), "648h")
+    expiration_date = timeadd(format("%sT00:00:00Z", formatdate("YYYY-MM-DD", timestamp())), "648h")
     # Need to extend this out to the max due to an issue where if the host pool registration token has expired on the Azure side,
     # a null value is returned as Terraform refreshes state. If the value is null, you will need to regen the token from Azure portal or using this command
     # https://github.com/hashicorp/terraform-provider-azurerm/issues/12038
@@ -154,10 +164,10 @@ resource "random_string" "avd" {
   lower   = false
   special = false
 
-  # this ensures that we get a fresh set of VMs on every run
-  keepers = {
-    timestamp = timestamp()
-  }
+  # # this ensures that we get a fresh set of VMs on every run
+  # keepers = {
+  #   timestamp = timestamp()
+  # }
 }
 
 locals {
@@ -223,14 +233,14 @@ resource "azurerm_windows_virtual_machine" "avd" {
     storage_account_type = var.vm_os_disk_caching.storage_account_type
   }
 
-  source_image_reference {
-    publisher = var.vm_image.publisher
-    offer     = var.vm_image.offer
-    sku       = var.vm_image.sku
-    version   = var.vm_image.version
-  }
+  # source_image_reference {
+  #   publisher = var.vm_image.publisher
+  #   offer     = var.vm_image.offer
+  #   sku       = var.vm_image.sku
+  #   version   = var.vm_image.version
+  # }
 
-  # source_image_id = data.azurerm_shared_image.avd.id
+  source_image_id = data.azurerm_shared_image.avd.id
 
   identity {
     type = "SystemAssigned"
@@ -330,7 +340,7 @@ PROTECTED_SETTINGS
 
   lifecycle {
     # create_before_destroy = true
-    ignore_changes        = [settings, protected_settings]
+    ignore_changes = [settings, protected_settings]
   }
 
   depends_on = [
@@ -370,9 +380,10 @@ SETTINGS
   }
 PROTECTED_SETTINGS
 
-  # lifecycle {
-  #   create_before_destroy = true
-  # }
+  lifecycle {
+    # create_before_destroy = true
+    ignore_changes = [settings, protected_settings]
+  }
 
   depends_on = [
     azurerm_virtual_machine_extension.domain_join,

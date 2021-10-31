@@ -25,7 +25,7 @@ variable "host_pool_type" {
 
 variable "host_pool_load_balancer_type" {
   type    = string
-  default = "BreadthFirst"
+  default = "DepthFirst"
 }
 
 variable "host_pool_validate_environment" {
@@ -137,6 +137,5 @@ variable "domain_username" {
 
 variable "domain_password" {
   type      = string
-  sensitive = true
   default   = ""
 }
