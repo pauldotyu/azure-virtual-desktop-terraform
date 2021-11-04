@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     azurerm = {
-      source = "hashicorp/azurerm"
+      source  = "hashicorp/azurerm"
       version = "=2.82.0"
     }
   }
@@ -183,7 +183,7 @@ locals {
   # vm_image_name  = element(reverse(split("/", data.azurerm_shared_image_version.avd.id)), 2)
 
   vm_name_prefix = format("VM%s%s", upper(substr(random_pet.avd.id, 0, 7)), random_string.avd.result)
-  vm_image_name  = var.vm_image.sku
+  vm_image_name  = var.sig_image_name #var.vm_image.sku
 }
 
 resource "azurerm_network_interface" "avd" {
