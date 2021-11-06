@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.82.0"
+      version = "=2.83.0"
     }
   }
 }
@@ -240,7 +240,8 @@ resource "azurerm_windows_virtual_machine" "avd" {
   #   version   = var.vm_image.version
   # }
 
-  source_image_id = data.azurerm_shared_image.avd.id
+  #source_image_id = data.azurerm_shared_image.avd.id
+  source_image_id = data.azurerm_shared_image_version.avd.id
 
   identity {
     type = "SystemAssigned"
