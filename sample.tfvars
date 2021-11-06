@@ -34,7 +34,7 @@ vm_os_disk_caching = {
 }
 
 # VM Image Definition
-vm_image = {
+vm_marketplace_image = {
   publisher = "microsoftwindowsdesktop"
   offer     = "office-365"
   sku       = "win11-21h2-avd-m365"
@@ -45,3 +45,14 @@ vm_image = {
 sig_image_name          = "avd-ethicalbedbug"
 sig_name                = "sigethicalbedbug"
 sig_resource_group_name = "rg-ethicalbedbug"
+
+host_pool_token_expiration = "2021-12-03T00:00:00Z"
+
+session_hosts = [
+  {
+    batch             = "A"
+    sig_image_version = "0.20211106.3"
+    count             = 1
+    status            = "Production"
+  },
+]

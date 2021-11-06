@@ -60,16 +60,16 @@ variable "vm_sku" {
   description = "Virtual machine SKU"
 }
 
-variable "username" {
+variable "vm_username" {
   type = string
 }
 
-variable "password" {
+variable "vm_password" {
   type      = string
   sensitive = true
 }
 
-variable "vm_image" {
+variable "vm_marketplace_image" {
   type = object({
     publisher = string
     offer     = string
@@ -138,4 +138,18 @@ variable "domain_username" {
 variable "domain_password" {
   type    = string
   default = ""
+}
+
+
+variable "session_hosts" {
+  type = list(object({
+    batch             = string
+    status            = string
+    count             = number
+    sig_image_version = string
+  }))
+}
+
+variable "host_pool_token_expiration" {
+  type = string
 }
