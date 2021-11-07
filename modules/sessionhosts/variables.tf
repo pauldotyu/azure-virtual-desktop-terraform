@@ -26,9 +26,6 @@ variable "session_host_status" {
   type = string
 }
 
-variable "session_host_batch" {
-  type = string
-}
 variable "vm_name_prefix" {
   type = string
 }

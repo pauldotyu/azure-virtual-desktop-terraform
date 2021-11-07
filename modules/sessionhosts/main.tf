@@ -16,24 +16,9 @@ resource "random_string" "avd" {
   # }
 }
 
-locals {
-  # NOTE: this algorithm works for images that were built using Azure Image Builder as they produce unique image versions that look like this: 0.24926.27922
-  # Logic to build VM name prefix:
-  # 1. Get the image version
-  # 2. Grab the id
-  # 3. Split the id into an array using slash
-  # 4. Reverse the order of the elements in the array
-  # 5. Take the first element
-  # 6. Remove the dot
-  # vm_name_prefix = replace(element(reverse(split("/", data.azurerm_shared_image_version.avd.id)), 0), ".", "")
-  # vm_image_name  = element(reverse(split("/", data.azurerm_shared_image_version.avd.id)), 2)
-
-  vm_name_prefix = format("%s%s-%s", var.vm_name_prefix, random_string.avd.result, var.session_host_batch)
-}
-
 resource "azurerm_network_interface" "avd" {
   count               = var.vm_count
-  name                = "${local.vm_name_prefix}-${count.index + 1}_nic"
+  name                = "${var.vm_name_prefix}-${count.index + 1}_nic"
   resource_group_name = var.resource_group_name
   location            = var.location
 
@@ -52,7 +37,7 @@ resource "azurerm_network_interface" "avd" {
 
 resource "azurerm_windows_virtual_machine" "avd" {
   count                    = var.vm_count
-  name                     = "${local.vm_name_prefix}-${count.index + 1}"
+  name                     = "${var.vm_name_prefix}-${count.index + 1}"
   resource_group_name      = var.resource_group_name
   location                 = var.location
   size                     = var.vm_sku
@@ -73,7 +58,7 @@ resource "azurerm_windows_virtual_machine" "avd" {
   ]
 
   os_disk {
-    name                 = "${local.vm_name_prefix}-${count.index + 1}_osdisk"
+    name                 = "${var.vm_name_prefix}-${count.index + 1}_osdisk"
     caching              = var.vm_os_disk_caching.caching
     storage_account_type = var.vm_os_disk_caching.storage_account_type
   }
@@ -151,7 +136,7 @@ resource "local_file" "avd" {
 
 resource "azurerm_virtual_machine_extension" "domain_join" {
   count                      = var.configure_using_ansible ? 0 : var.vm_count
-  name                       = "${local.vm_name_prefix}-${count.index + 1}-DomainJoin"
+  name                       = "${var.vm_name_prefix}-${count.index + 1}-DomainJoin"
   virtual_machine_id         = azurerm_windows_virtual_machine.avd.*.id[count.index]
   publisher                  = "Microsoft.Compute"
   type                       = "JsonADDomainExtension"
@@ -186,7 +171,7 @@ PROTECTED_SETTINGS
 
 resource "azurerm_virtual_machine_extension" "rdagent_install" {
   count                      = var.configure_using_ansible ? 0 : var.vm_count
-  name                       = "${local.vm_name_prefix}-${count.index + 1}-RDAgentInstall"
+  name                       = "${var.vm_name_prefix}-${count.index + 1}-RDAgentInstall"
   virtual_machine_id         = azurerm_windows_virtual_machine.avd.*.id[count.index]
   publisher                  = "Microsoft.Powershell"
   type                       = "DSC"
