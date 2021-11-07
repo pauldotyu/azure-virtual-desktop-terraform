@@ -37,7 +37,6 @@ stages:
                 -out=$(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
             displayName: Terraform Plan
             name: terraform_plan
-            condition: eq(variables.destroy, false)
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: $(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
