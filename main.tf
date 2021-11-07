@@ -164,7 +164,7 @@ module "sessionhosts" {
   host_pool_name          = azurerm_virtual_desktop_host_pool.avd.name
   host_pool_token         = azurerm_virtual_desktop_host_pool.avd.registration_info[0].token
   session_host_status     = each.value["status"]
-  vm_name_prefix          = format("%s-%s", upper(substr(random_pet.avd.id, 0, 10)), each.value["batch"])
+  vm_name_prefix          = format("%s-%s", upper(substr(random_pet.avd.id, 0, 8)), each.value["batch"])
   vm_count                = each.value["count"]
   vm_sku                  = var.vm_sku
   vm_username             = var.vm_username
