@@ -53,10 +53,10 @@ stages:
         pool: Server
         steps:
           - task: ManualValidation@0
-            displayName: Terraform plan review
+            displayName: Review terraform plan output
             inputs:
               notifyUsers: $(notifyUsers)
-              instructions: "Have you looked at the plan output?"
+              instructions: "Please review the terraform plan output in the stage above and click Resume to continue."
       - job: terraform_apply
         displayName: Terraform Apply
         dependsOn:
