@@ -2,8 +2,8 @@ trigger:
   - main
 
 variables:
-# Secrets pull from key vault
-- group: kvdevops1
+  # Secrets pull from key vault
+  - group: kvdevops1
 
 pool:
   name: Contoso
@@ -15,13 +15,26 @@ stages:
       - job: terraform_plan
         displayName: Terraform Plan
         steps:
+          - task: DownloadSecureFile@1
+            name: terraformrc
+            displayName: "Download .terraformrc"
+            inputs:
+              secureFile: ".terraformrc"
           - script: |
+              export TF_CLI_CONFIG_FILE="$(terraformrc.secureFilePath)"
               export ARM_CLIENT_ID=$(client-id)
               export ARM_CLIENT_SECRET=$(client-secret)
               export ARM_SUBSCRIPTION_ID=$(main-subscription-id)
               export ARM_TENANT_ID=$(tenant-id)
               terraform init
-              terraform plan -out=$(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
+              terraform plan -var-file=sample.tfvars \
+                -var "vm_username=$(local-vm-username)" \
+                -var "vm_password=$(local-vm-password)" \
+                -var "domain_name=$(ad-domain-name)" \
+                -var "domain_ou_path=$(ad-domain-ou-path)" \
+                -var "domain_username=$(ad-domain-username)" \
+                -var "domain_password=$(ad-domain-password)" \
+                -out=$(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
             displayName: Terraform Plan
             name: terraform_plan
             condition: eq(variables.destroy, false)

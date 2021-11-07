@@ -8,22 +8,21 @@ tags = {
 }
 
 # Virtual Networking
-vnet_address_space = ["10.21.17.0/28"]
+vnet_address_space = ["10.103.1.0/24"]
+snet_address_space = ["10.103.1.0/25"]
 vnet_custom_dns_servers = [
-  "10.21.0.4",
-  "10.21.0.5"
+  "10.102.2.4"
 ]
 vnet_peerings = [
   {
-    vnet_resource_group_name = "rg-aadds"
-    vnet_name                = "vn-aadds"
+    vnet_resource_group_name = "rg-adds"
+    vnet_name                = "vn-adds"
   },
   {
     vnet_resource_group_name = "rg-devops"
     vnet_name                = "vn-devops"
   }
 ]
-snet_address_space = ["10.21.17.0/28"]
 
 # VM Size
 vm_count = 1
@@ -41,17 +40,16 @@ vm_marketplace_image = {
   version   = "latest"
 }
 
-# Use either this or the image source above - still testing
-sig_image_name          = "avd-ethicalbedbug"
-sig_name                = "sigethicalbedbug"
-sig_resource_group_name = "rg-ethicalbedbug"
-
 host_pool_token_expiration = "2021-12-03T00:00:00Z"
+
+sig_resource_group_name = "rg-cheesehead"
+sig_name                = "sigcheesehead"
+sig_image_name          = "windows11-m365"
 
 session_hosts = [
   {
-    batch             = "A"
-    sig_image_version = "0.20211106.3"
+    batch             = "002"
+    sig_image_version = "0.20211107.2"
     count             = 1
     status            = "Production"
   },
