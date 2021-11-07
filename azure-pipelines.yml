@@ -1,19 +1,33 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+  - main
+
+variables:
+# Secrets pull from key vault
+- group: kvdevops1
 
 pool:
-  vmImage: ubuntu-latest
+  name: Contoso
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+  - stage: terraform_plan
+    displayName: Terraform Plan
+    jobs:
+      - job: terraform_plan
+        displayName: Terraform Plan
+        steps:
+          - script: |
+              export ARM_CLIENT_ID=$(client-id)
+              export ARM_CLIENT_SECRET=$(client-secret)
+              export ARM_SUBSCRIPTION_ID=$(main-subscription-id)
+              export ARM_TENANT_ID=$(tenant-id)
+              terraform init
+              terraform plan -out=$(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
+            displayName: Terraform Plan
+            name: terraform_plan
+            condition: eq(variables.destroy, false)
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
+              artifactName: $(Build.BuildId).tfplan
+            displayName: Publish $(Build.BuildId).tfplan
+            name: publish_plan
