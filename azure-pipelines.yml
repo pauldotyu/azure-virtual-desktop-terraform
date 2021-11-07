@@ -49,10 +49,11 @@ stages:
     condition: succeeded()
     jobs:
       - job: manual_validation
-        displayName: Manual Approval
+        displayName: Approval Gate
         pool: Server
         steps:
           - task: ManualValidation@0
+            displayName: Terraform plan review
             inputs:
               notifyUsers: $(notifyUsers)
               instructions: "Have you looked at the plan output?"
@@ -68,7 +69,13 @@ stages:
               path: $(System.DefaultWorkingDirectory)
             displayName: Download $(Build.BuildId).tfplan
             name: download_plan
+          - task: DownloadSecureFile@1
+            name: terraformrc
+            displayName: "Download .terraformrc"
+            inputs:
+              secureFile: ".terraformrc"
           - script: |
+              export TF_CLI_CONFIG_FILE="$(terraformrc.secureFilePath)"
               export ARM_CLIENT_ID=$(client-id)
               export ARM_CLIENT_SECRET=$(client-secret)
               export ARM_SUBSCRIPTION_ID=$(main-subscription-id)
