@@ -43,3 +43,39 @@ stages:
               artifactName: $(Build.BuildId).tfplan
             displayName: Publish $(Build.BuildId).tfplan
             name: publish_plan
+  - stage: terraform_apply
+    displayName: Terraform Apply
+    dependsOn: terraform_plan
+    condition: succeeded()
+    jobs:
+      - job: manual_validation
+        displayName: Manual Approval
+        pool: Server
+        steps:
+          - task: ManualValidation@0
+            inputs:
+              notifyUsers: $(notifyUsers)
+              instructions: "Have you looked at the plan output?"
+      - job: terraform_apply
+        displayName: Terraform Apply
+        dependsOn:
+          - manual_validation
+        steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: $(Build.BuildId).tfplan
+              patterns: "**/$(Build.BuildId).tfplan"
+              path: $(System.DefaultWorkingDirectory)
+            displayName: Download $(Build.BuildId).tfplan
+            name: download_plan
+          - script: |
+              export ARM_CLIENT_ID=$(client-id)
+              export ARM_CLIENT_SECRET=$(client-secret)
+              export ARM_SUBSCRIPTION_ID=$(main-subscription-id)
+              export ARM_TENANT_ID=$(tenant-id)
+              terraform init
+              terraform apply --auto-approve $(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
+            displayName: Terraform Apply
+            name: terraform_apply
+            failOnStderr: true
+            continueOnError: false
