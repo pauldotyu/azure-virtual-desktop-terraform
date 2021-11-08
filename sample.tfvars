@@ -48,8 +48,8 @@ sig_image_name          = "windows11-m365"
 
 session_hosts = [
   {
-    batch             = "002"
-    sig_image_version = "0.20211107.2"
+    batch             = "001"
+    sig_image_version = "0.20211107.3"
     count             = 1
     status            = "Production"
   },
