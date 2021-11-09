@@ -157,21 +157,22 @@ module "sessionhosts" {
 
   for_each = { for sh in var.session_hosts : sh.batch => sh }
 
+  session_host_status     = each.value["status"]
+  vm_count                = each.value["count"]
+  vm_custom_image_id      = "${data.azurerm_shared_image.avd.id}/versions/${each.value["sig_image_version"]}"
+  vm_name_prefix          = format("%s-%s", upper(substr(random_pet.avd.id, 0, 8)), each.value["batch"])
+
   resource_group_name     = azurerm_resource_group.avd.name
   location                = azurerm_resource_group.avd.location
   subnet_id               = azurerm_subnet.avd.id
   tags                    = var.tags
   host_pool_name          = azurerm_virtual_desktop_host_pool.avd.name
   host_pool_token         = azurerm_virtual_desktop_host_pool.avd.registration_info[0].token
-  session_host_status     = each.value["status"]
-  vm_name_prefix          = format("%s-%s", upper(substr(random_pet.avd.id, 0, 8)), each.value["batch"])
-  vm_count                = each.value["count"]
   vm_sku                  = var.vm_sku
   vm_username             = var.vm_username
   vm_password             = var.vm_password
   vm_os_disk_caching      = var.vm_os_disk_caching
   vm_marketplace_image    = null
-  vm_custom_image_id      = "${data.azurerm_shared_image.avd.id}/versions/${each.value["sig_image_version"]}"
   configure_using_ansible = var.configure_using_ansible
   domain_name             = var.domain_name
   domain_ou_path          = var.domain_ou_path

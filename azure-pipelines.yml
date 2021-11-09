@@ -41,7 +41,7 @@ stages:
             inputs:
               targetPath: $(System.DefaultWorkingDirectory)/$(Build.BuildId).tfplan
               artifactName: $(Build.BuildId).tfplan
-            displayName: Publish $(Build.BuildId).tfplan
+            displayName: Publish terraform plan artifact
             name: publish_plan
   - stage: terraform_apply
     displayName: Terraform Apply
@@ -67,7 +67,7 @@ stages:
               artifactName: $(Build.BuildId).tfplan
               patterns: "**/$(Build.BuildId).tfplan"
               path: $(System.DefaultWorkingDirectory)
-            displayName: Download $(Build.BuildId).tfplan
+            displayName: Download terraform plan artifact
             name: download_plan
           - task: DownloadSecureFile@1
             name: terraformrc

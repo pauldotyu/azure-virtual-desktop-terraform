@@ -2,20 +2,6 @@
 ##############################################
 # AZURE VIRTUAL DESKTOP - SESSION HOSTS
 ##############################################
-
-resource "random_string" "avd" {
-  length  = 3
-  upper   = true
-  number  = true
-  lower   = false
-  special = false
-
-  # # this ensures that we get a fresh set of VMs on every run
-  # keepers = {
-  #   timestamp = timestamp()
-  # }
-}
-
 resource "azurerm_network_interface" "avd" {
   count               = var.vm_count
   name                = "${var.vm_name_prefix}-${count.index + 1}_nic"
