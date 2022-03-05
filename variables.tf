@@ -2,6 +2,31 @@ variable "location" {
   type = string
 }
 
+variable "desktopvirtualization_location" {
+  type        = string
+  description = "DesktopVirtualization resource location can be different from session host region. As of 2/28/22, this resource is only available in the following regions: 'uksouth,ukwest,canadaeast,canadacentral,northeurope,westeurope,eastus,eastus2,westus,westus2,northcentralus,southcentralus,westcentralus,centralus'"
+}
+
+variable "netops_subscription_id" {
+  type        = string
+  description = "Adding a new provider here as some AVD deployments may need to peer with hub vnets in a different subscription. If the hub network is in the same subscription as the AVD deployment, then set the AVD subscription ID here."
+}
+
+variable "netops_role_tag_value" {
+  type        = string
+  description = "Virtual network peerings will be made based on a \"role\" tags on the resource. Any resource virtual network resources with this value will peered."
+}
+
+variable "devops_subscription_id" {
+  type        = string
+  description = "Adding a new provider here as some AVD deployments may need to peer with hub vnets in a different subscription. If the hub network is in the same subscription as the AVD deployment, then set the AVD subscription ID here."
+}
+
+variable "devops_role_tag_value" {
+  type        = string
+  description = "Virtual network peerings will be made based on a \"role\" tags on the resource. Any resource virtual network resources with this value will peered."
+}
+
 variable "tags" {
   type = map(any)
 }
@@ -50,6 +75,11 @@ variable "desktop_app_group_type" {
   }
 }
 
+variable "aad_group_name" {
+  type        = string
+  description = "Azure AD Security-Enabled Group to be assigned to the Desktop Application Group"
+}
+
 variable "vm_count" {
   type    = number
   default = 1
@@ -87,25 +117,17 @@ variable "vm_os_disk_caching" {
   description = "Virtual machine OS disk caching"
 }
 
-variable "vnet_peerings" {
-  type = list(object({
-    vnet_resource_group_name = string
-    vnet_name                = string
-  }))
-  description = "List of remote virtual networks to peer with"
-}
-
-variable "sig_image_name" {
+variable "acg_image_name" {
   type        = string
   description = "Image definition name"
 }
 
-variable "sig_name" {
+variable "acg_name" {
   type        = string
   description = "Shared Image Gallery name"
 }
 
-variable "sig_resource_group_name" {
+variable "acg_resource_group_name" {
   type        = string
   description = "Shared Image Gallery resource group name"
 }
@@ -146,10 +168,6 @@ variable "session_hosts" {
     batch             = string
     status            = string
     count             = number
-    sig_image_version = string
+    acg_image_version = string
   }))
-}
-
-variable "host_pool_token_expiration" {
-  type = string
 }

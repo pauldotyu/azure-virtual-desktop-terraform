@@ -32,4 +32,7 @@ override.tf.json
 *.tfplan
 
 # Exclude ansible inventory files
-ansible/inventory-*
+ansible/inventory
+
+# Exclude tfbackend files
+*.tfbackend

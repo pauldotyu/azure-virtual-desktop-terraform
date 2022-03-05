@@ -1,23 +1,24 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "=2.83.0"
-    }
-  }
-}
-
 provider "azurerm" {
   features {}
 }
 
-resource "random_pet" "avd" {
-  length    = 2
+resource "random_pet" "p" {
+  length    = 1
   separator = ""
 }
 
+resource "random_integer" "i" {
+  min = 100
+  max = 999
+}
+
+locals {
+  resource_name        = format("%s%s", "avd", random_pet.p.id)
+  resource_name_unique = format("%s%s%s", "avd", random_pet.p.id, random_integer.i.result)
+}
+
 resource "azurerm_resource_group" "avd" {
-  name     = "rg-${random_pet.avd.id}"
+  name     = "rg-${local.resource_name}"
   location = var.location
   tags     = var.tags
 }
@@ -27,7 +28,7 @@ resource "azurerm_resource_group" "avd" {
 ##############################################
 
 resource "azurerm_virtual_network" "avd" {
-  name                = "vn-${random_pet.avd.id}"
+  name                = "vn-${local.resource_name}"
   resource_group_name = azurerm_resource_group.avd.name
   location            = azurerm_resource_group.avd.location
   tags                = var.tags
@@ -36,14 +37,14 @@ resource "azurerm_virtual_network" "avd" {
 }
 
 resource "azurerm_subnet" "avd" {
-  name                 = "sn-${random_pet.avd.id}"
+  name                 = "sn-${local.resource_name}"
   resource_group_name  = azurerm_resource_group.avd.name
   virtual_network_name = azurerm_virtual_network.avd.name
   address_prefixes     = var.snet_address_space
 }
 
 resource "azurerm_network_security_group" "avd" {
-  name                = "nsg-${random_pet.avd.id}"
+  name                = "nsg-${local.resource_name}"
   resource_group_name = azurerm_resource_group.avd.name
   location            = azurerm_resource_group.avd.location
   tags                = var.tags
@@ -55,22 +56,29 @@ resource "azurerm_subnet_network_security_group_association" "avd" {
 }
 
 ##########################################
-# VIRTUAL NETWORK PEERING
+# VIRTUAL NETWORK PEERING - NETOPS
 ##########################################
+
+provider "azurerm" {
+  features {}
+  alias           = "netops"
+  subscription_id = var.netops_subscription_id
+}
 
 # Get resources by type, create vnet peerings
 data "azurerm_resources" "vnets" {
-  type = "Microsoft.Network/virtualNetworks"
+  provider = azurerm.netops
+  type     = "Microsoft.Network/virtualNetworks"
 
   required_tags = {
-    role = "azops"
+    role = var.netops_role_tag_value
   }
 }
 
 # this will peer out to all the virtual networks tagged with a role of azops
 resource "azurerm_virtual_network_peering" "out" {
   count                        = length(data.azurerm_resources.vnets.resources)
-  name                         = "${azurerm_virtual_network.avd.name}-to-${data.azurerm_resources.vnets.resources[count.index].name}"
+  name                         = data.azurerm_resources.vnets.resources[count.index].name
   remote_virtual_network_id    = data.azurerm_resources.vnets.resources[count.index].id
   resource_group_name          = azurerm_resource_group.avd.name
   virtual_network_name         = azurerm_virtual_network.avd.name
@@ -84,11 +92,61 @@ resource "azurerm_virtual_network_peering" "out" {
 # this also needs work. right now it is using variables when it should be using the data resource pulled from above;
 # howver, the challenge is that the data resource does not return the resrouces' resource group which is required for peering
 resource "azurerm_virtual_network_peering" "in" {
-  for_each                     = { for vp in var.vnet_peerings : vp.vnet_name => vp }
-  name                         = "${each.value["vnet_name"]}-to-${azurerm_virtual_network.avd.name}"
+  provider                     = azurerm.netops
+  count                        = length(data.azurerm_resources.vnets.resources)
+  name                         = azurerm_virtual_network.avd.name
   remote_virtual_network_id    = azurerm_virtual_network.avd.id
-  resource_group_name          = each.value["vnet_resource_group_name"]
-  virtual_network_name         = each.value["vnet_name"]
+  resource_group_name          = split("/", data.azurerm_resources.vnets.resources[count.index].id)[4]
+  virtual_network_name         = data.azurerm_resources.vnets.resources[count.index].name
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
+  allow_gateway_transit        = true
+  use_remote_gateways          = false
+}
+
+##########################################
+# VIRTUAL NETWORK PEERING - DEVOPS
+##########################################
+
+provider "azurerm" {
+  features {}
+  alias           = "devops"
+  subscription_id = var.devops_subscription_id
+}
+
+# Get resources by type, create vnet peerings
+data "azurerm_resources" "devops_vnets" {
+  provider = azurerm.devops
+  type     = "Microsoft.Network/virtualNetworks"
+
+  required_tags = {
+    role = var.devops_role_tag_value
+  }
+}
+
+# this will peer out to all the virtual networks tagged with a role of azops
+resource "azurerm_virtual_network_peering" "devops_vnet_peer_out" {
+  count                        = length(data.azurerm_resources.devops_vnets.resources)
+  name                         = data.azurerm_resources.devops_vnets.resources[count.index].name
+  remote_virtual_network_id    = data.azurerm_resources.devops_vnets.resources[count.index].id
+  resource_group_name          = azurerm_resource_group.avd.name
+  virtual_network_name         = azurerm_virtual_network.avd.name
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+}
+
+# this will peer in from all the virtual networks tagged with the role of azops
+# this also needs work. right now it is using variables when it should be using the data resource pulled from above;
+# howver, the challenge is that the data resource does not return the resrouces' resource group which is required for peering
+resource "azurerm_virtual_network_peering" "devops_vnet_peer_in" {
+  provider                     = azurerm.devops
+  count                        = length(data.azurerm_resources.devops_vnets.resources)
+  name                         = azurerm_virtual_network.avd.name
+  remote_virtual_network_id    = azurerm_virtual_network.avd.id
+  resource_group_name          = split("/", data.azurerm_resources.devops_vnets.resources[count.index].id)[4]
+  virtual_network_name         = data.azurerm_resources.devops_vnets.resources[count.index].name
   allow_virtual_network_access = true
   allow_forwarded_traffic      = true
   allow_gateway_transit        = true
@@ -100,43 +158,36 @@ resource "azurerm_virtual_network_peering" "in" {
 ##############################################
 
 resource "azurerm_virtual_desktop_host_pool" "avd" {
-  name                     = "hp-${random_pet.avd.id}"
+  name                     = "hp-${local.resource_name}"
   resource_group_name      = azurerm_resource_group.avd.name
-  location                 = azurerm_resource_group.avd.location
+  location                 = var.desktopvirtualization_location #azurerm_resource_group.avd.location
   type                     = var.host_pool_type
   load_balancer_type       = var.host_pool_load_balancer_type
   validate_environment     = var.host_pool_validate_environment
   maximum_sessions_allowed = var.host_pool_max_sessions_allowed
+}
 
-  registration_info {
-    #expiration_date = timeadd(timestamp(), "2h")
-    #expiration_date = timeadd(format("%sT00:00:00Z", formatdate("YYYY-MM-DD", timestamp())), "648h")
-    # Need to extend this out to the max due to an issue where if the host pool registration token has expired on the Azure side,
-    # a null value is returned as Terraform refreshes state. If the value is null, you will need to regen the token from Azure portal or using this command
-    # https://github.com/hashicorp/terraform-provider-azurerm/issues/12038
-    # This can also cause issues when attempting to re-run the build once all session hosts have been deployed
-    # https://github.com/hashicorp/terraform-provider-azurerm/issues/12038
-    # As a workaround, we can manually set the expiration date to ensure it will not change on every run.
-    expiration_date = var.host_pool_token_expiration
-  }
+resource "azurerm_virtual_desktop_host_pool_registration_info" "avd" {
+  hostpool_id     = azurerm_virtual_desktop_host_pool.avd.id
+  expiration_date = timeadd(timestamp(), "2h")
 }
 
 # Both desktop and remote app application groups are being joined to a single host pool however, in production scenario, these should join to separate host pools
 
 resource "azurerm_virtual_desktop_application_group" "avd" {
-  name                = "ag-${random_pet.avd.id}"
+  name                = "ag-${local.resource_name}"
   resource_group_name = azurerm_resource_group.avd.name
-  location            = azurerm_resource_group.avd.location
+  location            = var.desktopvirtualization_location #azurerm_resource_group.avd.location
   host_pool_id        = azurerm_virtual_desktop_host_pool.avd.id
   type                = var.desktop_app_group_type
-  friendly_name       = upper(random_pet.avd.id)
+  friendly_name       = upper(local.resource_name)
 }
 
 resource "azurerm_virtual_desktop_workspace" "avd" {
-  name                = "ws-${random_pet.avd.id}"
+  name                = "ws-${local.resource_name}"
   resource_group_name = azurerm_resource_group.avd.name
-  location            = azurerm_resource_group.avd.location
-  friendly_name       = upper(random_pet.avd.id)
+  location            = var.desktopvirtualization_location #azurerm_resource_group.avd.location
+  friendly_name       = upper(local.resource_name)
 }
 
 resource "azurerm_virtual_desktop_workspace_application_group_association" "avd" {
@@ -144,12 +195,11 @@ resource "azurerm_virtual_desktop_workspace_application_group_association" "avd"
   application_group_id = azurerm_virtual_desktop_application_group.avd.id
 }
 
-
 # Build session hosts
 data "azurerm_shared_image" "avd" {
-  name                = var.sig_image_name
-  gallery_name        = var.sig_name
-  resource_group_name = var.sig_resource_group_name
+  name                = var.acg_image_name
+  gallery_name        = var.acg_name
+  resource_group_name = var.acg_resource_group_name
 }
 
 module "sessionhosts" {
@@ -157,17 +207,17 @@ module "sessionhosts" {
 
   for_each = { for sh in var.session_hosts : sh.batch => sh }
 
-  session_host_status     = each.value["status"]
-  vm_count                = each.value["count"]
-  vm_custom_image_id      = "${data.azurerm_shared_image.avd.id}/versions/${each.value["sig_image_version"]}"
-  vm_name_prefix          = format("%s-%s", upper(substr(random_pet.avd.id, 0, 8)), each.value["batch"])
+  session_host_status = each.value["status"]
+  vm_count            = each.value["count"]
+  vm_custom_image_id  = "${data.azurerm_shared_image.avd.id}/versions/${each.value["acg_image_version"]}"
+  vm_name_prefix      = format("%s-%s", upper(substr(local.resource_name, 0, 8)), each.value["batch"])
 
   resource_group_name     = azurerm_resource_group.avd.name
   location                = azurerm_resource_group.avd.location
   subnet_id               = azurerm_subnet.avd.id
   tags                    = var.tags
   host_pool_name          = azurerm_virtual_desktop_host_pool.avd.name
-  host_pool_token         = azurerm_virtual_desktop_host_pool.avd.registration_info[0].token
+  host_pool_token         = azurerm_virtual_desktop_host_pool_registration_info.avd.token
   vm_sku                  = var.vm_sku
   vm_username             = var.vm_username
   vm_password             = var.vm_password
@@ -184,4 +234,19 @@ module "sessionhosts" {
     azurerm_virtual_network_peering.out,
     azurerm_virtual_network_peering.in
   ]
+}
+
+########################################
+# APPLICATION GROUP RBAC ASSIGNMENT
+########################################
+
+data "azuread_group" "avd" {
+  display_name     = var.aad_group_name
+  security_enabled = true
+}
+
+resource "azurerm_role_assignment" "avd" {
+  scope                = azurerm_virtual_desktop_application_group.avd.id
+  role_definition_name = "Desktop Virtualization User"
+  principal_id         = data.azuread_group.avd.id
 }
